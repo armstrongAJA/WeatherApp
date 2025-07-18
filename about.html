@@ -5,21 +5,95 @@
   <style>
     body {
       margin: 0;
-      height: 100vh;
+      min-height: 100vh;
+      background-color: #f0f0f0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    .centered {
+      text-align: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* Flex container for table and chart */
+    .content-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    /* Table styles */
+    table {
+      border-collapse: collapse;
+      width: 300px;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    /* Chart container to hold spinner and image */
+    .chart-container {
+      position: relative;
+      width: 500px;
+      min-height: 300px;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #f0f0f0;
-      font-family: sans-serif;
     }
-    .centered {
-      text-align: center;
-      position: relative;
+
+    /* Spinner styles */
+    #spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      /* center spinner */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    /* Chart image hidden initially */
+    #chart {
+      max-width: 100%;
+      height: auto;
+      display: none;
+      z-index: 5;
     }
 
     /* Style the "Back to Home" button */
     #back-btn {
-      margin-top: 20px;
+      margin-top: 30px;
       padding: 10px 20px;
       font-size: 16px;
       background-color: #007bff;
@@ -27,6 +101,9 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
     #back-btn:hover {
       background-color: #0056b3;
@@ -35,13 +112,13 @@
     /* Modal overlay */
     .modal {
       display: none; /* Hidden by default */
-      position: fixed; /* Sit on top of everything */
-      z-index: 10; /* Above other elements */
+      position: fixed;
+      z-index: 100;
       left: 0;
       top: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+      background-color: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
     }
@@ -71,36 +148,31 @@
     #ok-btn:hover {
       background-color: #0056b3;
     }
-
-    /* Spinner styles */
-    #spinner {
-      margin: 30px auto 0;
-      border: 6px solid #f3f3f3; /* Light gray */
-      border-top: 6px solid #007bff; /* Blue */
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
   </style>
 </head>
 <body>
   <div class="centered">
     <h1>Example Graph Display</h1>
-    <br>
 
-    <!-- Spinner shown initially -->
-    <div id="spinner"></div>
+    <div class="content-wrapper">
+      <table>
+        <thead>
+          <tr><th>Quarter</th><th>Users</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Q1</td><td>50</td><td>$100</td></tr>
+          <tr><td>Q2</td><td>60</td><td>$200</td></tr>
+          <tr><td>Q3</td><td>70</td><td>$300</td></tr>
+          <tr><td>Q4</td><td>180</td><td>$400</td></tr>
+        </tbody>
+      </table>
 
-    <!-- Chart image hidden initially -->
-    <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart" style="margin-top: 30px; max-width: 100%; height: auto; display: none;">
+      <div class="chart-container">
+        <div id="spinner"></div>
+        <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart">
+      </div>
+    </div>
 
-    <br>
     <button id="back-btn">Back to Home</button>
   </div>
 
@@ -111,31 +183,6 @@
       <button id="ok-btn">OK</button>
     </div>
   </div>
-<div class="centered">
-  <h1>Example Graph Display</h1>
-  <br>
-
-  <div class="content-wrapper">
-    <table>
-      <thead>
-        <tr><th>Quarter</th><th>Users</th><th>Revenue</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Q1</td><td>50</td><td>$100</td></tr>
-        <tr><td>Q2</td><td>60</td><td>$200</td></tr>
-        <tr><td>Q3</td><td>70</td><td>$300</td></tr>
-        <tr><td>Q4</td><td>180</td><td>$400</td></tr>
-      </tbody>
-    </table>
-
-    <!-- Chart image hidden initially -->
-    <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart" style="max-width: 100%; height: auto; display: none;">
-  </div>
-
-  <!-- spinner and button as before -->
-  <div id="spinner"></div>
-  <button id="back-btn">Back to Home</button>
-</div>
 
   <script>
     const backBtn = document.getElementById('back-btn');
@@ -144,32 +191,27 @@
     const spinner = document.getElementById('spinner');
     const chart = document.getElementById('chart');
 
-    // Show modal on back button click
     backBtn.addEventListener('click', () => {
       modal.style.display = 'flex';
     });
 
-    // Close modal and navigate to home on OK click
     okBtn.addEventListener('click', () => {
       modal.style.display = 'none';
-      window.location.href = 'index.html'; // Navigate to home
+      window.location.href = 'index.html';
     });
 
-    // Close modal if clicking outside modal content
     window.addEventListener('click', (event) => {
       if (event.target === modal) {
         modal.style.display = 'none';
       }
     });
 
-    // When chart image loads, hide spinner and show chart
     function showChart() {
       spinner.style.display = 'none';
       chart.style.display = 'block';
     }
 
     if (chart.complete) {
-      // If image is cached and already loaded
       showChart();
     } else {
       chart.addEventListener('load', showChart);

@@ -111,6 +111,31 @@
       <button id="ok-btn">OK</button>
     </div>
   </div>
+<div class="centered">
+  <h1>Example Graph Display</h1>
+  <br>
+
+  <div class="content-wrapper">
+    <table>
+      <thead>
+        <tr><th>Quarter</th><th>Users</th><th>Revenue</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Q1</td><td>50</td><td>$100</td></tr>
+        <tr><td>Q2</td><td>60</td><td>$200</td></tr>
+        <tr><td>Q3</td><td>70</td><td>$300</td></tr>
+        <tr><td>Q4</td><td>180</td><td>$400</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Chart image hidden initially -->
+    <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart" style="max-width: 100%; height: auto; display: none;">
+  </div>
+
+  <!-- spinner and button as before -->
+  <div id="spinner"></div>
+  <button id="back-btn">Back to Home</button>
+</div>
 
   <script>
     const backBtn = document.getElementById('back-btn');

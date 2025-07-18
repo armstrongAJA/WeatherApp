@@ -3,12 +3,28 @@
 <html>
 <head>
   <title>About</title>
+  <style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+  }
+  .centered {
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-  <h1>This is the About page</h1>
-  <Br>
-  <img src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart" style="margin-top: 30px; max-width: 100%; height: auto;">
-  <Br>
-  <a href="index.html">Back to Home</a>
+  <div class="centered">
+    <h1>This is the About page</h1>
+    <Br>
+    <img src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart" style="margin-top: 30px; max-width: 100%; height: auto;">
+    <Br>
+    <a href="index.html">Back to Home</a>
+  </div>
 </body>
 </html>

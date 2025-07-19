@@ -308,6 +308,7 @@
       const tdWeather = document.createElement('td');
       const code = data.data_day.pictocode[i];
       const weatherInfo = weatherCodeMap[code].text || { icon: '❓', text: 'Unknown' };
+      console.log('weather info by code:',weatherInfo)
       const spanIcon = document.createElement('span');
       spanIcon.textContent = weatherInfo.icon;
       spanIcon.style.marginRight = '8px';

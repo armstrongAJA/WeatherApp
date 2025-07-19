@@ -151,7 +151,7 @@
 </head>
 <body>
   <div class="centered">
-    <h1>Meteoblue 7-Day Weather Forecast (London)</h1>
+    <h1 id ="pageHeader">Meteoblue 7-Day Weather Forecast (London)</h1>
 
     <div class="content-wrapper">
       <div class="table-container">
@@ -321,6 +321,7 @@
     }
 
     spinner.style.display = 'none';
+    document.getElementById('location-heading').textContent = `Meteoblue 7-Day Weather Forecast (${LOCATION})`;
   }
 
   init();

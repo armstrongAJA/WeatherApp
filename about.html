@@ -348,33 +348,34 @@
     return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
   }
   async function loadWeatherCodeMap() {
-    try {
-      const res = await fetch(pictogramUrl);
-      if (!res.ok) throw new Error('Failed to load pictogram data');
-      const pictogramData = await res.json();
-  
-      // pictogramData structure might be an array or object — adapt accordingly
-      // Example:
-      // {
-      //   "1": { "text": "Clear sky", "icon": "01_day.svg" },
-      //   "3": { "text": "Rain", "icon": "03_day.svg" },
-      //    ...
-      // }
-  
-      const map = {};
-      for (const code in pictogramData) {
-        const entry = pictogramData[code];
-        map[parseInt(code)] = {
-          text: entry.text,
-          icon: `./icons/${entry.icon}` // path to your local icons folder
-        };
+  const pictogramUrl = "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
+
+  try {
+    const res = await fetch(pictogramUrl, {
+      headers: {
+        "Accept": "application/json"
       }
-      return map;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+    });
+
+    if (!res.ok) throw new Error('Failed to load pictogram data');
+
+    const pictogramData = await res.json();
+
+    const map = {};
+    pictogramData.daily.forEach(entry => {
+      const code = entry.pictocode;
+      const description = entry.description;
+      map[code] = { text: description };
+    });
+
+    return map;
+
+  } catch (error) {
+    console.error('Error loading pictocode map:', error);
+    return {};
   }
+}
+
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';

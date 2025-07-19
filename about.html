@@ -305,10 +305,10 @@
 
       const tdWeather = document.createElement('td');
       const code = data.data_day.pictocode[i];
-      const weatherInfo = weatherCodeMap[code].text || { icon: '❓', text: 'Unknown' };
+      const weatherInfo = weatherCodeMap[code].text || 'Unknown';
       console.log('weather info by code:',weatherInfo)
       const spanIcon = document.createElement('span');
-      spanIcon.textContent = weatherInfo.icon;
+      spanIcon.textContent = weatherInfo;
       spanIcon.style.marginRight = '8px';
       tdWeather.appendChild(spanIcon);
       tdWeather.appendChild(document.createTextNode(weatherInfo.text));

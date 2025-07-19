@@ -164,14 +164,14 @@
             </tr>
           </thead>
           <tbody id="table-body">
-            <!-- Dynamic rows -->
+            <!-- Dynamic rows here -->
           </tbody>
         </table>
       </div>
 
       <div class="chart-container">
         <div id="spinner"></div>
-        <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'],datasets:[{label:'Max Temp (°C)',data:[20,22,19,18,21,23,20]}]}}" alt="Bar Chart" />
+        <img id="chart" alt="Bar Chart" />
       </div>
     </div>
 
@@ -186,69 +186,65 @@
   </div>
 
 <script>
-  // Replace with your Meteoblue API key
   const API_KEY = 'Nqye1omCdRA2Jrab';
-  const LAT = 51.5073;  // London latitude
-  const LON = -0.1276;  // London longitude
+  const LAT = 51.5073;  
+  const LON = -0.1276;  
 
-  // Meteoblue daily forecast endpoint example (7-day)
-  // Docs: https://www.meteoblue.com/en/weather/api
-  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
+  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
+?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
   const chart = document.getElementById('chart');
 
-  // Helper: Map Meteoblue weather codes to icons & text
+  // Map pictocode to emoji/icon + text - adjust or extend as needed
   const weatherCodeMap = {
-    0: { icon: '☀️', text: 'Clear' },
-    1: { icon: '🌤️', text: 'Partly Cloudy' },
-    2: { icon: '☁️', text: 'Cloudy' },
     3: { icon: '🌧️', text: 'Rain' },
-    4: { icon: '⛈️', text: 'Thunderstorms' },
-    5: { icon: '❄️', text: 'Snow' },
-    // Add other codes as needed
+    8: { icon: '☀️', text: 'Clear' },
+    16: { icon: '⛅', text: 'Partly Cloudy' },
+    // Add more pictocode mappings if needed
   };
-
-  async function fetchWeatherData() {
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      console.log('Fetched data:', data); // Debug: log full data
-      // Meteoblue returns 'data.daily' array of days
-      return data?.daily || [];
-    } catch(err) {
-      console.error('Error fetching Meteoblue data:', err);
-      alert('Failed to load weather data.');
-      return [];
-    }
-  }
 
   function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
-  function populateTable(dailyData) {
+  async function fetchWeatherData() {
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      console.log('Fetched data:', data); // For debugging
+      return data;
+    } catch (err) {
+      console.error('Error fetching Meteoblue data:', err);
+      alert('Failed to load weather data.');
+      return null;
+    }
+  }
+
+  function populateTable(data) {
     tableBody.innerHTML = '';
 
-    dailyData.forEach(day => {
+    const daysCount = data.time.length;
+
+    for (let i = 0; i < daysCount; i++) {
       const tr = document.createElement('tr');
 
       // Date
       const tdDate = document.createElement('td');
-      tdDate.textContent = formatDate(day.date);
+      tdDate.textContent = formatDate(data.time[i]);
       tr.appendChild(tdDate);
 
-      // Max Temp Celsius (assuming day.temperature_max is in °C)
+      // Max Temp Celsius
       const tdTemp = document.createElement('td');
-      tdTemp.textContent = day.temperature_max.toFixed(1);
+      tdTemp.textContent = data.temperature_max[i].toFixed(1);
       tr.appendChild(tdTemp);
 
-      // Weather Icon + Text from code
+      // Weather Icon + Text from pictocode
       const tdWeather = document.createElement('td');
-      const weatherInfo = weatherCodeMap[day.weathercode] || { icon: '❓', text: 'Unknown' };
+      const weatherInfo = weatherCodeMap[data.pictocode[i]] || { icon: '❓', text: 'Unknown' };
 
       const spanIcon = document.createElement('span');
       spanIcon.textContent = weatherInfo.icon;
@@ -259,27 +255,62 @@
       tr.appendChild(tdWeather);
 
       tableBody.appendChild(tr);
-    });
+    }
   }
 
-  function showChart() {
-    spinner.style.display = 'none';
-    chart.style.display = 'block';
+  function createChartUrl(data) {
+    const labels = data.time.map(dateStr => {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { weekday: 'short' });
+    });
+
+    const temps = data.temperature_max;
+
+    const chartConfig = {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Max Temp (°C)',
+          data: temps,
+          backgroundColor: 'rgba(0, 123, 255, 0.7)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    };
+
+    // Encode chart config as URL param
+    return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
   }
 
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';
-    const dailyData = await fetchWeatherData();
-    if(dailyData.length){
-      populateTable(dailyData);
+
+    const data = await fetchWeatherData();
+    if (data) {
+      populateTable(data);
+
+      chart.src = createChartUrl(data);
+      chart.style.display = 'block';
+    } else {
+      tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
     }
-    showChart();
+
+    spinner.style.display = 'none';
   }
 
   init();
 
-  // Back button and modal logic
+  // Back button & modal
   const backBtn = document.getElementById('back-btn');
   const modal = document.getElementById('modal');
   const okBtn = document.getElementById('ok-btn');

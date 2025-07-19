@@ -250,8 +250,6 @@
   const chart = document.getElementById('chart');
   const citySelect = document.getElementById('city-select');
 
-  const weatherCodeMap = await loadWeatherCodeMap();
-  console.log(weatherCodeMap);
   function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
@@ -381,6 +379,8 @@
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';
+    const weatherCodeMap = await loadWeatherCodeMap();
+    console.log(weatherCodeMap);
     const [lat, lon] = await getLatLong(LOCATION);
     if (!lat || !lon) {
       alert('Failed to get location coordinates.');

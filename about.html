@@ -194,13 +194,6 @@
   </div>
 
 <script>
-  const API_KEY = 'Nqye1omCdRA2Jrab';
-  const LOCATION = 'Leeds'
-  const latLong = getLatLong(LOCATION)
-  const LAT = latLong[0];
-  const LON = latLong[1];
-  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
-?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
@@ -327,6 +320,8 @@
       alert('Failed to get location coordinates.');
       return;
     }
+    const API_KEY = 'Nqye1omCdRA2Jrab';
+    const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
     const data = await fetchWeatherData();
     console.log('Data received in init:', data.data_day.time);
     if (data) {

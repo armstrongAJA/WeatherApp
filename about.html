@@ -307,7 +307,7 @@
 
       const tdWeather = document.createElement('td');
       const code = data.data_day.pictocode[i];
-      const weatherInfo = weatherCodeMap[code] || { icon: '❓', text: 'Unknown' };
+      const weatherInfo = weatherCodeMap[code].text || { icon: '❓', text: 'Unknown' };
       const spanIcon = document.createElement('span');
       spanIcon.textContent = weatherInfo.icon;
       spanIcon.style.marginRight = '8px';

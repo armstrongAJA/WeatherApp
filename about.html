@@ -219,18 +219,27 @@
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
   
-  function getLatLong(location) {
-    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
-    const locationLatLong = 
-      fetch(geocodeUrl)
-      .then(res => res.json())
-      .then(result => {
-        const { lat, lon } = result[0];
-        console.log(`${location} is at ${locationLatLong}`);
-        // Now call Meteoblue API with these coordinates
-      });
-    return locationLatLong;
+  async function getLatLong(location) {
+  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+
+  try {
+    const res = await fetch(geocodeUrl);
+    const result = await res.json();
+
+    if (!result[0]) {
+      throw new Error(`Location "${location}" not found.`);
+    }
+
+    const { lat, lon } = result[0];
+    console.log(`${location} is at ${lat}, ${lon}`);
+
+    return [parseFloat(lat), parseFloat(lon)];
+  } catch (err) {
+    console.error('Geocoding error:', err);
+    return [null, null]; // fallback in case of error
   }
+}
+
   
   async function fetchWeatherData() {
     try {

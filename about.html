@@ -259,12 +259,12 @@
   }
 
   function createChartUrl(data) {
-    const labels = data.time.map(dateStr => {
+    const labels = data.data_day.time.map(dateStr => {
       const d = new Date(dateStr);
       return d.toLocaleDateString(undefined, { weekday: 'short' });
     });
 
-    const temps = data.temperature_max;
+    const temps = data.data_day.temperature_max;
 
     const chartConfig = {
       type: 'bar',

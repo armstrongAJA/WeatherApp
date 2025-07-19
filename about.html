@@ -193,14 +193,14 @@
 
   // Meteoblue daily forecast endpoint example (7-day)
   // Docs: https://www.meteoblue.com/en/weather/api
-  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
+  const API_URL = https://my.meteoblue.com/packages/basic-1h_basic-day
 ?lat=${LAT}
 &lon=${LON}
 &asl=35
 &tz=Europe/London
 &name=London
 &format=json
-&apikey=${API_KEY}`;
+&apikey=${API_KEY};
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
@@ -221,7 +221,7 @@
   async function fetchWeatherData() {
     try {
       const res = await fetch(API_URL);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) throw new Error(HTTP error! status: ${res.status});
       const data = await res.json();
       // Meteoblue returns 'data.daily' array of days
       return data?.daily || [];
@@ -274,24 +274,15 @@
     chart.style.display = 'block';
   }
 
-  async function fetchWeatherData() {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-
-    // Add this line to see the full response JSON in browser console:
-    console.log('Fetched data:', data);
-
-    // Adjust this return once you confirm the correct data path
-    return data?.daily || [];
-  } catch(err) {
-    console.error('Error fetching Meteoblue data:', err);
-    alert('Failed to load weather data.');
-    return [];
+  async function init() {
+    spinner.style.display = 'block';
+    chart.style.display = 'none';
+    const dailyData = await fetchWeatherData();
+    if(dailyData.length){
+      populateTable(dailyData);
+    }
+    showChart();
   }
-}
-
 
   init();
 

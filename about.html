@@ -282,6 +282,10 @@
       populateTable(dailyData);
     }
     showChart();
+        const data = await dailyData.json();
+
+    // Add this line to see the full response JSON in browser console:
+    console.log('Fetched data:', data);
   }
 
   init();

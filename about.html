@@ -147,37 +147,59 @@
       width: 24px;
       height: 24px;
     }
-    #city-select {
-      padding: 8px 12px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background-color: white;
-      color: #333;
-      margin-left: 8px;
-      cursor: pointer;
-      appearance: none; /* optional: removes native arrow styling */
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    #city-select:focus {
-      outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-    }
+    .city-select-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+#city-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 8px 36px 8px 12px; /* extra right padding for arrow */
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 180px;
+}
+
+#city-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+/* Arrow icon using a pseudo-element */
+.city-select-wrapper::after {
+  content: "▼";
+  font-size: 12px;
+  color: #333;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
   </style>
 </head>
 <body>
   <div class="centered">
     <h1 id="pageHeader">Meteoblue 7-Day Weather Forecast (London)</h1>
     <br>
-    <label for="city-select">Select City: </label>
-    <select id="city-select">
-      <option value="London">London</option>
-      <option value="Leeds">Leeds</option>
-      <option value="Manchester">Manchester</option>
-      <option value="Bristol">Bristol</option>
-    </select>
+    <label for="city-select">Select City:</label>
+    <div class="city-select-wrapper">
+      <select id="city-select">
+        <option value="London">London</option>
+        <option value="Leeds">Leeds</option>
+        <option value="Manchester">Manchester</option>
+        <option value="Bristol">Bristol</option>
+      </select>
+    </div>
 
     <div class="content-wrapper">
       <div class="table-container">

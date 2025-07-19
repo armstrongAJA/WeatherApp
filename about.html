@@ -250,7 +250,7 @@
   const chart = document.getElementById('chart');
   const citySelect = document.getElementById('city-select');
 
-  const weatherCodeMap = loadWeatherCodeMap();
+  const weatherCodeMap = await loadWeatherCodeMap();
   console.log(weatherCodeMap);
   function formatDate(dateStr) {
     const d = new Date(dateStr);

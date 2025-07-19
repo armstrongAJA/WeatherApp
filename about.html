@@ -219,26 +219,23 @@
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
   
-  async function getLatLong(location) {
-  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
-
-  try {
-    const res = await fetch(geocodeUrl);
-    const result = await res.json();
-
-    if (!result[0]) {
-      throw new Error(`Location "${location}" not found.`);
-    }
-
-    const { lat, lon } = result[0];
-    console.log(`${location} is at ${lat}, ${lon}`);
-
-    return [parseFloat(lat), parseFloat(lon)];
-  } catch (err) {
-    console.error('Geocoding error:', err);
-    return [null, null]; // fallback in case of error
+  function getLatLong(location) {
+    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+  
+    return fetch(geocodeUrl)
+      .then(res => res.json())
+      .then(result => {
+        if (!result[0]) throw new Error(`No results for ${location}`);
+        const { lat, lon } = result[0];
+        console.log(`${location} is at ${lat}, ${lon}`);
+        return [parseFloat(lat), parseFloat(lon)];
+      })
+      .catch(err => {
+        console.error('Geocoding error:', err);
+        return [null, null];
+      });
   }
-}
+
 
   
   async function fetchWeatherData() {
@@ -325,7 +322,11 @@
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';
-
+    const [LAT, LON] = await getLatLong('Leeds');
+    if (!LAT || !LON) {
+      alert('Failed to get location coordinates.');
+      return;
+    }
     const data = await fetchWeatherData();
     console.log('Data received in init:', data.data_day.time);
     if (data) {

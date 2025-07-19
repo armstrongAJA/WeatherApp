@@ -273,12 +273,29 @@
         tdTemp.textContent = item.main.temprature.toFixed(2);
         tr.appendChild(tdTemp);
 
-        // Weather main (e.g. Rain, Clear)
+        // Weather main with icon
         const tdWeatherMain = document.createElement('td');
-        tdWeatherMain.textContent = item.weather[0]?.main || '';
+        
+        const iconUrl = item.weather[0]?.icon || '';
+        const mainText = item.weather[0]?.main || '';
+        
+        if (iconUrl) {
+          const img = document.createElement('img');
+          img.src = iconUrl;
+          img.alt = mainText;
+          img.style.width = '24px';
+          img.style.height = '24px';
+          img.style.verticalAlign = 'middle';
+          img.style.marginRight = '6px';
+          tdWeatherMain.appendChild(img);
+        }
+        
+        const textNode = document.createTextNode(mainText);
+        tdWeatherMain.appendChild(textNode);
+        
         tr.appendChild(tdWeatherMain);
-
         tableBody.appendChild(tr);
+
       });
     }
 

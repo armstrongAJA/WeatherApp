@@ -193,14 +193,14 @@
 
   // Meteoblue daily forecast endpoint example (7-day)
   // Docs: https://www.meteoblue.com/en/weather/api
-  const API_URL = https://my.meteoblue.com/packages/basic-1h_basic-day
+  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
 ?lat=${LAT}
 &lon=${LON}
 &asl=35
 &tz=Europe/London
 &name=London
 &format=json
-&apikey=${API_KEY};
+&apikey=${API_KEY}`;
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');

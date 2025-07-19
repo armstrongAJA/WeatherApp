@@ -316,7 +316,7 @@ function pictocodeToFilename(code) {
 
     // Create img element for the icon
     const iconImg = document.createElement('img');
-    iconImg.src = `./icons/${pictocodeToFilename(code)}`; // Ensure pictocodeToFilename returns correct filename string
+    iconImg.src = `./${pictocodeToFilename(code)}`; // Ensure pictocodeToFilename returns correct filename string
     iconImg.alt = weatherInfo;
     iconImg.style.width = '24px';
     iconImg.style.height = '24px';

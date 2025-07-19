@@ -226,7 +226,7 @@
       .then(res => res.json())
       .then(result => {
         const { lat, lon } = result[0];
-        console.log(`${location} is at ${lat}, ${lon}`);
+        console.log(`${location} is at ${locationLatLong}`);
         // Now call Meteoblue API with these coordinates
       });
     return locationLatLong;

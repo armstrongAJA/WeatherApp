@@ -244,7 +244,7 @@
 
       // Weather Icon + Text from pictocode
       const tdWeather = document.createElement('td');
-      const weatherInfo = weatherCodeMap[data.pictocode[i]] || { icon: '❓', text: 'Unknown' };
+      const weatherInfo = weatherCodeMap[data.data_day.pictocode[i]] || { icon: '❓', text: 'Unknown' };
 
       const spanIcon = document.createElement('span');
       spanIcon.textContent = weatherInfo.icon;

@@ -224,7 +224,7 @@
     }
   }
 
-  function populateTable(data.data_day) {
+  function populateTable(data) {
     tableBody.innerHTML = '';
 
     const daysCount = data.time.length;
@@ -234,12 +234,12 @@
 
       // Date
       const tdDate = document.createElement('td');
-      tdDate.textContent = formatDate(data.time[i]);
+      tdDate.textContent = formatDate(data.data_day.time[i]);
       tr.appendChild(tdDate);
 
       // Max Temp Celsius
       const tdTemp = document.createElement('td');
-      tdTemp.textContent = data.temperature_max[i].toFixed(1);
+      tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
       tr.appendChild(tdTemp);
 
       // Weather Icon + Text from pictocode

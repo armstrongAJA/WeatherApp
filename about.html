@@ -288,7 +288,7 @@
     }
   }
 
-  function populateTable(data) {
+  function populateTable(data, weatherCodeMap) {
     tableBody.innerHTML = '';
     const count = data.data_day.time.length;
 
@@ -347,39 +347,39 @@
     return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
   }
   async function loadWeatherCodeMap() {
-  const pictogramUrl = "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
-
-  try {
-    const res = await fetch(pictogramUrl, {
-      headers: {
-        "Accept": "application/json"
-      }
-    });
-
-    if (!res.ok) throw new Error('Failed to load pictogram data');
-
-    const pictogramData = await res.json();
-
-    const map = {};
-    pictogramData.daily.forEach(entry => {
-      const code = entry.pictocode;
-      const description = entry.description;
-      map[code] = { text: description };
-    });
-    console.log('pictogramdata:', map)
-
-    return map;
-
-  } catch (error) {
-    console.error('Error loading pictocode map:', error);
-    return {};
+    const pictogramUrl = "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
+  
+    try {
+      const res = await fetch(pictogramUrl, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+  
+      if (!res.ok) throw new Error('Failed to load pictogram data');
+  
+      const pictogramData = await res.json();
+  
+      const map = {};
+      pictogramData.daily.forEach(entry => {
+        const code = entry.pictocode;
+        const description = entry.description;
+        map[code] = { text: description };
+      });
+      console.log('pictogramdata:', map)
+  
+      return map;
+  
+    } catch (error) {
+      console.error('Error loading pictocode map:', error);
+      return {};
+    }
   }
-}
 
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';
-    const weatherCodeMap = await loadWeatherCodeMap();
+    weatherCodeMap = await loadWeatherCodeMap();
     console.log(weatherCodeMap);
     const [lat, lon] = await getLatLong(LOCATION);
     if (!lat || !lon) {
@@ -392,7 +392,7 @@
 
     const data = await fetchWeatherData();
     if (data) {
-      populateTable(data);
+      populateTable(data, weatherCodeMap);
       chart.src = createChartUrl(data);
       chart.style.display = 'block';
     } else {

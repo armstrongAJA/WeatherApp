@@ -193,7 +193,7 @@
 </head>
 <body>
   <div class="centered">
-    <h1 id="pageHeader">Meteoblue 7-Day Weather Forecast (London)</h1>
+    <h1 id="pageHeader">7-Day Weather Forecast (Leeds)</h1>
     <br>
     <label for="city-select">Select City:</label>
     <div class="city-select-wrapper">
@@ -318,8 +318,8 @@ function pictocodeToFilename(code) {
     const iconImg = document.createElement('img');
     iconImg.src = `./${pictocodeToFilename(code)}`; // Ensure pictocodeToFilename returns correct filename string
     iconImg.alt = weatherInfo;
-    iconImg.style.width = '30px';
-    iconImg.style.height = '30px';
+    iconImg.style.width = '50px';
+    iconImg.style.height = '50px';
     iconImg.style.verticalAlign = 'middle';
     iconImg.style.display = 'block';
     iconImg.style.margin = '0 auto 5px'; // center and add space below

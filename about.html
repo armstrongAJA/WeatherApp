@@ -221,7 +221,7 @@
   async function fetchWeatherData() {
     try {
       const res = await fetch(API_URL);
-      if (!res.ok) throw new Error(HTTP error! status: ${res.status});
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       // Meteoblue returns 'data.daily' array of days
       return data?.daily || [];

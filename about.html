@@ -274,15 +274,24 @@
     chart.style.display = 'block';
   }
 
-  async function init() {
-    spinner.style.display = 'block';
-    chart.style.display = 'none';
-    const dailyData = await fetchWeatherData();
-    if(dailyData.length){
-      populateTable(dailyData);
-    }
-    showChart();
+  async function fetchWeatherData() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+
+    // Add this line to see the full response JSON in browser console:
+    console.log('Fetched data:', data);
+
+    // Adjust this return once you confirm the correct data path
+    return data?.daily || [];
+  } catch(err) {
+    console.error('Error fetching Meteoblue data:', err);
+    alert('Failed to load weather data.');
+    return [];
   }
+}
+
 
   init();
 
@@ -305,8 +314,6 @@
       modal.style.display = 'none';
     }
   });
-  const data = await res.json();
-  console.log('Fetched data:', data);
 </script>
 </body>
 </html>

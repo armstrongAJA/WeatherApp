@@ -193,21 +193,13 @@
 
   // Meteoblue daily forecast endpoint example (7-day)
   // Docs: https://www.meteoblue.com/en/weather/api
-  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
-?lat=${LAT}
-&lon=${LON}
-&asl=35
-&tz=Europe/London
-&name=London
-&format=json
-&apikey=${API_KEY}`;
+  const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
   const chart = document.getElementById('chart');
 
   // Helper: Map Meteoblue weather codes to icons & text
-  // (Example mapping: you can extend/change with actual Meteoblue codes)
   const weatherCodeMap = {
     0: { icon: '☀️', text: 'Clear' },
     1: { icon: '🌤️', text: 'Partly Cloudy' },
@@ -223,6 +215,7 @@
       const res = await fetch(API_URL);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
+      console.log('Fetched data:', data); // Debug: log full data
       // Meteoblue returns 'data.daily' array of days
       return data?.daily || [];
     } catch(err) {
@@ -282,10 +275,6 @@
       populateTable(dailyData);
     }
     showChart();
-        const data = await dailyData.json();
-
-    // Add this line to see the full response JSON in browser console:
-    console.log('Fetched data:', data);
   }
 
   init();

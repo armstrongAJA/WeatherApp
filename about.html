@@ -330,6 +330,15 @@
       modal.style.display = 'none';
     }
   });
+  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=Leeds&format=json`;
+
+fetch(geocodeUrl)
+  .then(res => res.json())
+  .then(result => {
+    const { lat, lon } = result[0];
+    console.log(`Leeds is at ${lat}, ${lon}`);
+    // Now call Meteoblue API with these coordinates
+  });
 </script>
 </body>
 </html>

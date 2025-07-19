@@ -227,7 +227,7 @@
   function populateTable(data) {
     tableBody.innerHTML = '';
 
-    const daysCount = data.time.length;
+    const daysCount = data.data_day.time.length;
 
     for (let i = 0; i < daysCount; i++) {
       const tr = document.createElement('tr');

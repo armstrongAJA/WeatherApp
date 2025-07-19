@@ -270,7 +270,11 @@
         return [null, null];
       });
   }
-
+  
+function pictocodeToFilename(code) {
+  const codeStr = code.toString().padStart(2, '0'); // e.g. '01', '03'
+  return `${codeStr}_iday.svg`;
+}
   function buildApiUrl() {
     return `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=${LOCATION}&format=json&apikey=${API_KEY}`;
   }
@@ -308,6 +312,7 @@
       const weatherInfo = weatherCodeMap[code].text || 'Unknown';
       console.log('weather info by code:',weatherInfo)
       const spanIcon = document.createElement('span');
+      spanIcon.appendChild(pictocodeToFilename(code));
       spanIcon.textContent = weatherInfo;
       spanIcon.style.marginRight = '8px';
       tdWeather.appendChild(spanIcon);

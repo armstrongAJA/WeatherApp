@@ -18,26 +18,34 @@
     .centered {
       text-align: center;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px;
     }
 
-    /* Flex container for table and chart */
     .content-wrapper {
       display: flex;
-      gap: 40px;
+      gap: 20px;
+      justify-content: space-between;
       align-items: flex-start;
-      justify-content: center;
       margin-top: 20px;
     }
 
-    /* Table styles */
-    table {
-      border-collapse: collapse;
+    .table-container,
+    .chart-container {
+      width: 50%;
+      max-width: 50%;
+      box-sizing: border-box;
+    }
+
+    .table-container {
       overflow-y: auto;
-      width: 300px;
-      height: 20px;
+      max-height: 300px;
       background: white;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
     }
 
     th, td {
@@ -51,18 +59,16 @@
       color: white;
     }
 
-    /* Chart container to hold spinner and image */
     .chart-container {
       position: relative;
+      height: 300px;
       background: white;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      display: inline-flex;
+      display: flex;
       justify-content: center;
       align-items: center;
     }
 
-
-    /* Spinner styles */
     #spinner {
       border: 6px solid #f3f3f3;
       border-top: 6px solid #007bff;
@@ -71,12 +77,10 @@
       height: 40px;
       animation: spin 1s linear infinite;
       position: absolute;
-      /* center spinner */
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 10;
-      display: block;
     }
 
     @keyframes spin {
@@ -84,16 +88,13 @@
       100% { transform: rotate(360deg);}
     }
 
-    /* Chart image hidden initially */
     #chart {
       max-width: 100%;
-      max-height:100%;
-      height: auto;
+      max-height: 100%;
       display: none;
       z-index: 5;
     }
 
-    /* Style the "Back to Home" button */
     #back-btn {
       margin-top: 30px;
       padding: 10px 20px;
@@ -107,13 +108,13 @@
       margin-left: auto;
       margin-right: auto;
     }
+
     #back-btn:hover {
       background-color: #0056b3;
     }
 
-    /* Modal overlay */
     .modal {
-      display: none; /* Hidden by default */
+      display: none;
       position: fixed;
       z-index: 100;
       left: 0;
@@ -125,7 +126,6 @@
       align-items: center;
     }
 
-    /* Modal content box */
     .modal-content {
       background-color: white;
       padding: 30px 40px;
@@ -136,7 +136,6 @@
       font-size: 18px;
     }
 
-    /* OK button inside modal */
     #ok-btn {
       margin-top: 20px;
       padding: 8px 16px;
@@ -147,6 +146,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     #ok-btn:hover {
       background-color: #0056b3;
     }
@@ -156,28 +156,27 @@
   <div class="centered">
     <h1>Example Graph Display</h1>
 
-  <div class="content-wrapper">
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr><th>Quarter</th><th>Users</th><th>Revenue</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Q1</td><td>50</td><td>$100</td></tr>
-          <tr><td>Q2</td><td>60</td><td>$200</td></tr>
-          <tr><td>Q3</td><td>70</td><td>$300</td></tr>
-          <tr><td>Q4</td><td>180</td><td>$400</td></tr>
-          <!-- add more rows if you want -->
-        </tbody>
-      </table>
+    <div class="content-wrapper">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Quarter</th><th>Users</th><th>Revenue</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Q1</td><td>50</td><td>$100</td></tr>
+            <tr><td>Q2</td><td>60</td><td>$200</td></tr>
+            <tr><td>Q3</td><td>70</td><td>$300</td></tr>
+            <tr><td>Q4</td><td>180</td><td>$400</td></tr>
+            <!-- Add more rows if needed -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="chart-container">
+        <div id="spinner"></div>
+        <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart">
+      </div>
     </div>
-
-  <div class="chart-container">
-    <div id="spinner"></div>
-    <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'Users',data:[50,60,70,180]},{label:'Revenue',data:[100,200,300,400]}]}}" alt="Bar Chart">
-  </div>
-</div>
-
 
     <button id="back-btn">Back to Home</button>
   </div>
@@ -196,7 +195,7 @@
     const okBtn = document.getElementById('ok-btn');
     const spinner = document.getElementById('spinner');
     const chart = document.getElementById('chart');
-    
+
     backBtn.addEventListener('click', () => {
       modal.style.display = 'flex';
     });

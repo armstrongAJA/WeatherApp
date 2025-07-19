@@ -293,35 +293,44 @@ function pictocodeToFilename(code) {
   }
 
   function populateTable(data, weatherCodeMap) {
-    tableBody.innerHTML = '';
-    const count = data.data_day.time.length;
+  tableBody.innerHTML = '';
+  const count = data.data_day.time.length;
 
-    for (let i = 0; i < count; i++) {
-      const tr = document.createElement('tr');
+  for (let i = 0; i < count; i++) {
+    const tr = document.createElement('tr');
 
-      const tdDate = document.createElement('td');
-      tdDate.textContent = formatDate(data.data_day.time[i]);
-      tr.appendChild(tdDate);
+    // Date cell
+    const tdDate = document.createElement('td');
+    tdDate.textContent = formatDate(data.data_day.time[i]);
+    tr.appendChild(tdDate);
 
-      const tdTemp = document.createElement('td');
-      tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
-      tr.appendChild(tdTemp);
+    // Max temperature cell
+    const tdTemp = document.createElement('td');
+    tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
+    tr.appendChild(tdTemp);
 
-      const tdWeather = document.createElement('td');
-      const code = data.data_day.pictocode[i];
-      const weatherInfo = weatherCodeMap[code].text || 'Unknown';
-      console.log('weather info by code:',weatherInfo)
-      const spanIcon = document.createElement('span');
-      spanIcon.appendChild(pictocodeToFilename(code));
-      spanIcon.textContent = weatherInfo;
-      spanIcon.style.marginRight = '8px';
-      tdWeather.appendChild(spanIcon);
-      tdWeather.appendChild(document.createTextNode(weatherInfo.text));
-      tr.appendChild(tdWeather);
+    // Weather cell with icon and text
+    const tdWeather = document.createElement('td');
+    const code = data.data_day.pictocode[i];
+    const weatherInfo = weatherCodeMap[code]?.text || 'Unknown';
 
-      tableBody.appendChild(tr);
-    }
+    // Create img element for the icon
+    const iconImg = document.createElement('img');
+    iconImg.src = `./icons/${pictocodeToFilename(code)}`; // Ensure pictocodeToFilename returns correct filename string
+    iconImg.alt = weatherInfo;
+    iconImg.style.width = '24px';
+    iconImg.style.height = '24px';
+    iconImg.style.verticalAlign = 'middle';
+    iconImg.style.marginRight = '8px';
+
+    tdWeather.appendChild(iconImg);
+    tdWeather.appendChild(document.createTextNode(weatherInfo));
+    tr.appendChild(tdWeather);
+
+    tableBody.appendChild(tr);
   }
+}
+
 
   function createChartUrl(data) {
     const labels = data.data_day.time.map(d => {

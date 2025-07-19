@@ -273,10 +273,10 @@
         tdTemp.textContent = item.main.temprature.toFixed(2);
         tr.appendChild(tdTemp);
 
-        // Summary
-        const tdSummary = document.createElement('td');
-        tdSummary.textContent = item.summery || item.weather[0]?.description || '';
-        tr.appendChild(tdSummary);
+        // Weather main (e.g. Rain, Clear)
+        const tdWeatherMain = document.createElement('td');
+        tdWeatherMain.textContent = item.weather[0]?.main || '';
+        tr.appendChild(tdWeatherMain);
 
         tableBody.appendChild(tr);
       });

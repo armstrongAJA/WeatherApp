@@ -1,192 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>About</title>
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background-color: #f0f0f0;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px 20px;
-      box-sizing: border-box;
-    }
-
-    .centered {
-      text-align: center;
-      width: 100%;
-      max-width: 900px;
-    }
-
-    /* Flex container for table and chart */
-    .content-wrapper {
-      display: flex;
-      gap: 40px;
-      align-items: flex-start;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    /* Table container for scrolling */
-    .table-container {
-      width: 45%;
-      max-height: 300px;
-      overflow-y: auto;
-      background: white;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-
-    /* Table styles */
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px 12px;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    /* Chart container */
-    .chart-container {
-      position: relative;
-      width: 45%;
-      min-height: 300px;
-      background: white;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Spinner styles */
-    #spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #007bff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      display: block;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-
-    /* Chart image */
-    #chart {
-      max-width: 100%;
-      max-height: 100%;
-      height: auto;
-      display: none;
-      z-index: 5;
-    }
-
-    /* Style the "Back to Home" button */
-    #back-btn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #back-btn:hover {
-      background-color: #0056b3;
-    }
-
-    /* Modal overlay */
-    .modal {
-      display: none; /* Hidden by default */
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Modal content box */
-    .modal-content {
-      background-color: white;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      text-align: center;
-      max-width: 300px;
-      font-size: 18px;
-    }
-
-    /* OK button inside modal */
-    #ok-btn {
-      margin-top: 20px;
-      padding: 8px 16px;
-      font-size: 16px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #ok-btn:hover {
-      background-color: #0056b3;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meteoblue 7-Day Forecast</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+  .centered {
+    text-align: center;
+    width: 100%;
+    max-width: 900px;
+  }
+  .content-wrapper {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .table-container {
+    width: 50vw;
+    max-width: 450px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    border-radius: 4px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  th {
+    background-color: #007bff;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .chart-container {
+    width: 50vw;
+    max-width: 450px;
+    min-height: 300px;
+    background: white;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    position: relative;
+  }
+  #spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: block;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+  #chart {
+    max-width: 100%;
+    height: auto;
+    display: none;
+    z-index: 5;
+    border-radius: 4px;
+  }
+  #back-btn {
+    margin-top: 30px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #back-btn:hover {
+    background-color: #0056b3;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 300px;
+    font-size: 18px;
+  }
+  #ok-btn {
+    margin-top: 20px;
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #ok-btn:hover {
+    background-color: #0056b3;
+  }
+  img.weather-icon {
+    vertical-align: middle;
+    margin-right: 6px;
+    width: 24px;
+    height: 24px;
+  }
+</style>
 </head>
 <body>
   <div class="centered">
-    <h1>Example Graph Display</h1>
+    <h1>Meteoblue 7-Day Weather Forecast (London)</h1>
 
     <div class="content-wrapper">
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>Date & Time</th><th>Temp (K)</th><th>Summary</th></tr>
+            <tr>
+              <th>Date</th>
+              <th>Max Temp (°C)</th>
+              <th>Weather</th>
+            </tr>
           </thead>
           <tbody id="table-body">
-            <!-- rows inserted here -->
+            <!-- Dynamic rows -->
           </tbody>
         </table>
       </div>
 
       <div class="chart-container">
         <div id="spinner"></div>
-        <img id="chart" alt="Temperature Chart">
+        <img id="chart" src="https://quickchart.io/chart?c={type:'bar',data:{labels:['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'],datasets:[{label:'Max Temp (°C)',data:[20,22,19,18,21,23,20]}]}}" alt="Bar Chart" />
       </div>
     </div>
 
     <button id="back-btn">Back to Home</button>
   </div>
 
-  <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <p>Go back to home page?</p>
@@ -194,143 +185,119 @@
     </div>
   </div>
 
-  <script>
-    const backBtn = document.getElementById('back-btn');
-    const modal = document.getElementById('modal');
-    const okBtn = document.getElementById('ok-btn');
-    const spinner = document.getElementById('spinner');
-    const chart = document.getElementById('chart');
-    const tableBody = document.getElementById('table-body');
+<script>
+  // Replace with your Meteoblue API key
+  const API_KEY = 'YOUR_METEBLUE_API_KEY';
+  const LAT = 51.5073;  // London latitude
+  const LON = -0.1276;  // London longitude
 
-    backBtn.addEventListener('click', () => {
-      modal.style.display = 'flex';
+  // Meteoblue daily forecast endpoint example (7-day)
+  // Docs: https://www.meteoblue.com/en/weather/api
+  const API_URL = `https://my.meteoblue.com/packages/weather-api/daily?apikey=${API_KEY}&lat=${LAT}&lon=${LON}&format=json&days=7&timezone=Europe/London`;
+
+  const tableBody = document.getElementById('table-body');
+  const spinner = document.getElementById('spinner');
+  const chart = document.getElementById('chart');
+
+  // Helper: Map Meteoblue weather codes to icons & text
+  // (Example mapping: you can extend/change with actual Meteoblue codes)
+  const weatherCodeMap = {
+    0: { icon: '☀️', text: 'Clear' },
+    1: { icon: '🌤️', text: 'Partly Cloudy' },
+    2: { icon: '☁️', text: 'Cloudy' },
+    3: { icon: '🌧️', text: 'Rain' },
+    4: { icon: '⛈️', text: 'Thunderstorms' },
+    5: { icon: '❄️', text: 'Snow' },
+    // Add other codes as needed
+  };
+
+  async function fetchWeatherData() {
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      // Meteoblue returns 'data.daily' array of days
+      return data?.daily || [];
+    } catch(err) {
+      console.error('Error fetching Meteoblue data:', err);
+      alert('Failed to load weather data.');
+      return [];
+    }
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function populateTable(dailyData) {
+    tableBody.innerHTML = '';
+
+    dailyData.forEach(day => {
+      const tr = document.createElement('tr');
+
+      // Date
+      const tdDate = document.createElement('td');
+      tdDate.textContent = formatDate(day.date);
+      tr.appendChild(tdDate);
+
+      // Max Temp Celsius (assuming day.temperature_max is in °C)
+      const tdTemp = document.createElement('td');
+      tdTemp.textContent = day.temperature_max.toFixed(1);
+      tr.appendChild(tdTemp);
+
+      // Weather Icon + Text from code
+      const tdWeather = document.createElement('td');
+      const weatherInfo = weatherCodeMap[day.weathercode] || { icon: '❓', text: 'Unknown' };
+
+      const spanIcon = document.createElement('span');
+      spanIcon.textContent = weatherInfo.icon;
+      spanIcon.style.marginRight = '8px';
+      tdWeather.appendChild(spanIcon);
+
+      tdWeather.appendChild(document.createTextNode(weatherInfo.text));
+      tr.appendChild(tdWeather);
+
+      tableBody.appendChild(tr);
     });
+  }
 
-    okBtn.addEventListener('click', () => {
+  function showChart() {
+    spinner.style.display = 'none';
+    chart.style.display = 'block';
+  }
+
+  async function init() {
+    spinner.style.display = 'block';
+    chart.style.display = 'none';
+    const dailyData = await fetchWeatherData();
+    if(dailyData.length){
+      populateTable(dailyData);
+    }
+    showChart();
+  }
+
+  init();
+
+  // Back button and modal logic
+  const backBtn = document.getElementById('back-btn');
+  const modal = document.getElementById('modal');
+  const okBtn = document.getElementById('ok-btn');
+
+  backBtn.addEventListener('click', () => {
+    modal.style.display = 'flex';
+  });
+
+  okBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    window.location.href = 'index.html';
+  });
+
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
       modal.style.display = 'none';
-      window.location.href = 'index.html';
-    });
-
-    window.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-
-    function showChart() {
-      spinner.style.display = 'none';
-      chart.style.display = 'block';
     }
-
-    // Build the chart URL and update the image
-    function updateChartFromApiData(data) {
-      const labels = data.list.map(item => item.dt_txt);
-      const temps = data.list.map(item => item.main.temprature);
-
-      const chartConfig = {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Temperature (K)',
-            data: temps,
-            fill: false,
-            borderColor: '#007bff',
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            x: { 
-              ticks: { maxRotation: 90, minRotation: 45 },
-              title: { display: true, text: 'Date & Time' }
-            },
-            y: {
-              title: { display: true, text: 'Temperature (K)' }
-            }
-          }
-        }
-      };
-
-      const chartUrl = 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
-      chart.src = chartUrl;
-      chart.onload = showChart;
-    }
-
-    // Populate table rows from API data
-    function updateTableFromApiData(data) {
-      tableBody.innerHTML = ''; // clear previous
-      data.list.forEach(item => {
-        const tr = document.createElement('tr');
-
-        // Date/time
-        const tdDate = document.createElement('td');
-        tdDate.textContent = item.dt_txt;
-        tr.appendChild(tdDate);
-
-        // Temperature (K)
-        const tdTemp = document.createElement('td');
-        tdTemp.textContent = item.main.temprature.toFixed(2);
-        tr.appendChild(tdTemp);
-
-        // Weather main with icon
-        const tdWeatherMain = document.createElement('td');
-        
-        const iconUrl = item.weather[0]?.icon || '';
-        const mainText = item.weather[0]?.main || '';
-        
-        if (iconUrl) {
-          const img = document.createElement('img');
-          img.src = iconUrl;
-          img.alt = mainText;
-          img.style.width = '24px';
-          img.style.height = '24px';
-          img.style.verticalAlign = 'middle';
-          img.style.marginRight = '6px';
-          tdWeatherMain.appendChild(img);
-        }
-        
-        const textNode = document.createTextNode(mainText);
-        tdWeatherMain.appendChild(textNode);
-        
-        tr.appendChild(tdWeatherMain);
-        tableBody.appendChild(tr);
-
-      });
-    }
-
-    async function fetchWeatherData() {
-      spinner.style.display = 'block';
-      chart.style.display = 'none';
-
-      const url = 'https://weather-api167.p.rapidapi.com/api/weather/forecast?place=London%2CGB&cnt=3&units=standard&type=three_hour&mode=json&lang=en';
-
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'X-Rapidapi-Key': '64c9c8b5ecmsh01a7d33e4669122p159721jsnf320f7aee0a0',
-            'X-Rapidapi-Host': 'weather-api167.p.rapidapi.com',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        updateTableFromApiData(data);
-        updateChartFromApiData(data);
-
-      } catch (err) {
-        spinner.style.display = 'none';
-        console.error('Failed to load data, see console.', err);
-        alert('Failed to load weather data. Check console for details.');
-      }
-    }
-
-    fetchWeatherData();
-  </script>
+  });
+</script>
 </body>
 </html>

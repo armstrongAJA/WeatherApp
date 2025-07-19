@@ -330,7 +330,7 @@
       modal.style.display = 'none';
     }
   });
-  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=Leeds&format=json`;
+  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=Leeds&country=united%20kingdom&format=json`;
 
 fetch(geocodeUrl)
   .then(res => res.json())

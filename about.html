@@ -189,7 +189,8 @@
   const API_KEY = 'Nqye1omCdRA2Jrab';
   const LAT = 51.5073;  
   const LON = -0.1276;  
-
+  const LOCATION = 'Leeds'
+  const latLong = getLatLong(LOCATION)
   const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day
 ?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
 
@@ -209,7 +210,20 @@
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
-
+  
+  function getLatLong(location) {
+    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+    const locationLatLong = 
+      fetch(geocodeUrl)
+      .then(res => res.json())
+      .then(result => {
+        const { lat, lon } = result[0];
+        console.log(`${location} is at ${lat}, ${lon}`);
+        // Now call Meteoblue API with these coordinates
+      });
+    return locationLatLong;
+  }
+  
   async function fetchWeatherData() {
     try {
       const res = await fetch(API_URL);
@@ -330,15 +344,7 @@
       modal.style.display = 'none';
     }
   });
-  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=Leeds&country=united%20kingdom&format=json`;
 
-fetch(geocodeUrl)
-  .then(res => res.json())
-  .then(result => {
-    const { lat, lon } = result[0];
-    console.log(`Leeds is at ${lat}, ${lon}`);
-    // Now call Meteoblue API with these coordinates
-  });
 </script>
 </body>
 </html>

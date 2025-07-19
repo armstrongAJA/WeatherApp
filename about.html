@@ -1,158 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Meteoblue 7-Day Forecast</title>
-<style>
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background-color: #f0f0f0;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 40px 20px;
-    box-sizing: border-box;
-  }
-  .centered {
-    text-align: center;
-    width: 100%;
-    max-width: 900px;
-  }
-  .content-wrapper {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  .table-container {
-    width: 50vw;
-    max-width: 450px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    border-radius: 4px;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    text-align: left;
-    vertical-align: middle;
-  }
-  th {
-    background-color: #007bff;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  .chart-container {
-    width: 50vw;
-    max-width: 450px;
-    min-height: 300px;
-    background: white;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 4px;
-    position: relative;
-  }
-  #spinner {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #007bff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    display: block;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-  }
-  #chart {
-    max-width: 100%;
-    height: auto;
-    display: none;
-    z-index: 5;
-    border-radius: 4px;
-  }
-  #back-btn {
-    margin-top: 30px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007bff;
-    border: none;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  #back-btn:hover {
-    background-color: #0056b3;
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-  }
-  .modal-content {
-    background-color: white;
-    padding: 30px 40px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    text-align: center;
-    max-width: 300px;
-    font-size: 18px;
-  }
-  #ok-btn {
-    margin-top: 20px;
-    padding: 8px 16px;
-    font-size: 16px;
-    background-color: #007bff;
-    border: none;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  #ok-btn:hover {
-    background-color: #0056b3;
-  }
-  img.weather-icon {
-    vertical-align: middle;
-    margin-right: 6px;
-    width: 24px;
-    height: 24px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meteoblue 7-Day Forecast</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #f0f0f0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    .centered {
+      text-align: center;
+      width: 100%;
+      max-width: 900px;
+    }
+    .content-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .table-container {
+      width: 50vw;
+      max-width: 450px;
+      max-height: 400px;
+      overflow-y: auto;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .chart-container {
+      width: 50vw;
+      max-width: 450px;
+      min-height: 300px;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      position: relative;
+    }
+    #spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    #chart {
+      max-width: 100%;
+      height: auto;
+      display: none;
+      z-index: 5;
+      border-radius: 4px;
+    }
+    #back-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #back-btn:hover {
+      background-color: #0056b3;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
+      max-width: 300px;
+      font-size: 18px;
+    }
+    #ok-btn {
+      margin-top: 20px;
+      padding: 8px 16px;
+      font-size: 16px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #ok-btn:hover {
+      background-color: #0056b3;
+    }
+    img.weather-icon {
+      vertical-align: middle;
+      margin-right: 6px;
+      width: 24px;
+      height: 24px;
+    }
+  </style>
 </head>
 <body>
   <div class="centered">
-    <h1 id ="pageHeader">Meteoblue 7-Day Weather Forecast (London)</h1>
-    <Br>
+    <h1 id="pageHeader">Meteoblue 7-Day Weather Forecast (London)</h1>
+    <br>
     <label for="city-select">Select City: </label>
     <select id="city-select">
       <option value="London">London</option>
@@ -172,7 +172,7 @@
             </tr>
           </thead>
           <tbody id="table-body">
-            <!-- Dynamic rows here -->
+            <!-- Weather rows -->
           </tbody>
         </table>
       </div>
@@ -194,12 +194,18 @@
   </div>
 
 <script>
+  // Global variables
+  let LOCATION = 'London';
+  let LAT = null;
+  let LON = null;
+  let API_URL = '';
+  const API_KEY = 'Nqye1omCdRA2Jrab';
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
   const chart = document.getElementById('chart');
+  const citySelect = document.getElementById('city-select');
 
-  // Map pictocode to emoji/icon + text - adjust or extend as needed
   const weatherCodeMap = {
     3: { icon: '🌧️', text: 'Rain' },
     8: { icon: '☀️', text: 'Clear' },
@@ -211,16 +217,15 @@
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
-  
+
   function getLatLong(location) {
     const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
-  
+
     return fetch(geocodeUrl)
       .then(res => res.json())
       .then(result => {
         if (!result[0]) throw new Error(`No results for ${location}`);
         const { lat, lon } = result[0];
-        console.log(`${location} is at ${lat}, ${lon}`);
         return [parseFloat(lat), parseFloat(lon)];
       })
       .catch(err => {
@@ -229,14 +234,15 @@
       });
   }
 
+  function buildApiUrl() {
+    return `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=${LOCATION}&format=json&apikey=${API_KEY}`;
+  }
 
-  
   async function fetchWeatherData() {
     try {
       const res = await fetch(API_URL);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
-      console.log('Fetched data:', data); // For debugging
       return data;
     } catch (err) {
       console.error('Error fetching Meteoblue data:', err);
@@ -247,31 +253,26 @@
 
   function populateTable(data) {
     tableBody.innerHTML = '';
+    const count = data.data_day.time.length;
 
-    const daysCount = data.data_day.time.length;
-
-    for (let i = 0; i < daysCount; i++) {
+    for (let i = 0; i < count; i++) {
       const tr = document.createElement('tr');
 
-      // Date
       const tdDate = document.createElement('td');
       tdDate.textContent = formatDate(data.data_day.time[i]);
       tr.appendChild(tdDate);
 
-      // Max Temp Celsius
       const tdTemp = document.createElement('td');
       tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
       tr.appendChild(tdTemp);
 
-      // Weather Icon + Text from pictocode
       const tdWeather = document.createElement('td');
-      const weatherInfo = weatherCodeMap[data.data_day.pictocode[i]] || { icon: '❓', text: 'Unknown' };
-
+      const code = data.data_day.pictocode[i];
+      const weatherInfo = weatherCodeMap[code] || { icon: '❓', text: 'Unknown' };
       const spanIcon = document.createElement('span');
       spanIcon.textContent = weatherInfo.icon;
       spanIcon.style.marginRight = '8px';
       tdWeather.appendChild(spanIcon);
-
       tdWeather.appendChild(document.createTextNode(weatherInfo.text));
       tr.appendChild(tdWeather);
 
@@ -280,9 +281,8 @@
   }
 
   function createChartUrl(data) {
-    const labels = data.data_day.time.map(dateStr => {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString(undefined, { weekday: 'short' });
+    const labels = data.data_day.time.map(d => {
+      return new Date(d).toLocaleDateString(undefined, { weekday: 'short' });
     });
 
     const temps = data.data_day.temperature_max;
@@ -301,32 +301,29 @@
       },
       options: {
         scales: {
-          y: {
-            beginAtZero: false
-          }
+          y: { beginAtZero: false }
         }
       }
     };
 
-    // Encode chart config as URL param
     return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
   }
 
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';
-    const [LAT, LON] = await getLatLong('Leeds');
-    if (!LAT || !LON) {
+    const [lat, lon] = await getLatLong(LOCATION);
+    if (!lat || !lon) {
       alert('Failed to get location coordinates.');
       return;
     }
-    const API_KEY = 'Nqye1omCdRA2Jrab';
-    const API_URL = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=London&format=json&apikey=${API_KEY}`;
+    LAT = lat;
+    LON = lon;
+    API_URL = buildApiUrl();
+
     const data = await fetchWeatherData();
-    console.log('Data received in init:', data.data_day.time);
     if (data) {
       populateTable(data);
-
       chart.src = createChartUrl(data);
       chart.style.display = 'block';
     } else {
@@ -337,36 +334,28 @@
     document.getElementById('pageHeader').textContent = `Meteoblue 7-Day Weather Forecast (${LOCATION})`;
   }
 
-  init();
-
-  // Back button & modal
-  const backBtn = document.getElementById('back-btn');
-  const modal = document.getElementById('modal');
-  const okBtn = document.getElementById('ok-btn');
-
-  backBtn.addEventListener('click', () => {
-    modal.style.display = 'flex';
+  // Event listeners
+  citySelect.addEventListener('change', async () => {
+    LOCATION = citySelect.value;
+    await init();
   });
 
-  okBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
+  document.getElementById('back-btn').addEventListener('click', () => {
+    document.getElementById('modal').style.display = 'flex';
+  });
+
+  document.getElementById('ok-btn').addEventListener('click', () => {
     window.location.href = 'index.html';
   });
 
   window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      modal.style.display = 'none';
+    if (event.target === document.getElementById('modal')) {
+      document.getElementById('modal').style.display = 'none';
     }
   });
-  citySelect.addEventListener('change', async () => {
-  const [name, lat, lon] = citySelect.value.split(',');
-  CITY_NAME = name;
-  LAT = parseFloat(lat);
-  LON = parseFloat(lon);
-  API_URL = buildApiUrl();
-  await init();
-});
 
+  // Initial load
+  init();
 </script>
 </body>
 </html>

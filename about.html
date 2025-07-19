@@ -250,12 +250,7 @@
   const chart = document.getElementById('chart');
   const citySelect = document.getElementById('city-select');
 
-  const weatherCodeMap = {
-    3: { icon: '🌧️', text: 'Rain' },
-    8: { icon: '☀️', text: 'Clear' },
-    16: { icon: '⛅', text: 'Partly Cloudy' },
-    // Add more pictocode mappings if needed
-  };
+  const weatherCodeMap = loadWeatherCodeMap();
 
   function formatDate(dateStr) {
     const d = new Date(dateStr);
@@ -352,7 +347,34 @@
 
     return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
   }
-
+  async function loadWeatherCodeMap() {
+    try {
+      const res = await fetch(pictogramUrl);
+      if (!res.ok) throw new Error('Failed to load pictogram data');
+      const pictogramData = await res.json();
+  
+      // pictogramData structure might be an array or object — adapt accordingly
+      // Example:
+      // {
+      //   "1": { "text": "Clear sky", "icon": "01_day.svg" },
+      //   "3": { "text": "Rain", "icon": "03_day.svg" },
+      //    ...
+      // }
+  
+      const map = {};
+      for (const code in pictogramData) {
+        const entry = pictogramData[code];
+        map[parseInt(code)] = {
+          text: entry.text,
+          icon: `./icons/${entry.icon}` // path to your local icons folder
+        };
+      }
+      return map;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
   async function init() {
     spinner.style.display = 'block';
     chart.style.display = 'none';

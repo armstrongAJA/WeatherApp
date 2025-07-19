@@ -296,7 +296,7 @@
     chart.style.display = 'none';
 
     const data = await fetchWeatherData();
-    console.log('Data received in init:', data);
+    console.log('Data received in init:', data.data_day.time);
     if (data) {
       populateTable(data);
 

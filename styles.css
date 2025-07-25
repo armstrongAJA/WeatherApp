@@ -23,8 +23,8 @@ body {
     }
     .table-container {
       width: 50vw;
-      max-width: 450px;
-      max-height: 400px;
+      max-width: 1000px;
+      max-height: 1000px;
       overflow-y: auto;
       background: white;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);

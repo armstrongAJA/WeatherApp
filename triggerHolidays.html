@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Holiday Approval</title>
+  
   <script>
     window.onload = function() {
       const params = new URLSearchParams(window.location.search);
@@ -14,7 +15,7 @@
       //buildURL
       const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
       const successString = "The holiday has been approved.<br>You may now close this window.";
-      const failedString = "The holiday approval failed. Please try again, or contact your system administrator if the problem persists.";
+      const failedString = "The holiday approval failed.<br>Please try again, or contact your system administrator if the problem persists.";
       
       // do a GET on the url to trigger the flow and change the text displayed on the site.
       fetch(fullUrl, { method: "GET" })
@@ -24,7 +25,7 @@
           console.log("The GET request attempt was successful.");
         })
         .catch(() => {
-          document.getElementById('display-text').textContent = failedString;
+          document.getElementById('display-text').innerHTML = failedString;
           console.log("The GET request attempt failed.");
         })
         .finally(() => {
@@ -33,10 +34,33 @@
 
     };
   </script>
+  
+  <style>
+  body, html {
+    height: 100%;
+    margin: 0;
+  }
+
+  .center-container {
+    display: flex;
+    justify-content: center;  /* Center horizontally */
+    align-items: center;      /* Center vertically */
+    height: 100vh;            /* Full viewport height */
+  }
+
+  .centered-box {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+  }
+</style>
+  
 </head>
 <body>
-  <div>
+<div class="center-container">
+  <div class="centered-box">
     <h1 id="display-text">Loading...</h1>
   </div>
+</div>
 </body>
 </html>

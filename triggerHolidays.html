@@ -4,30 +4,27 @@
   <meta charset="utf-8" />
   <title>Holiday Approval</title>
   <script>
-    // function to read parameters passed via url
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
-
     window.onload = function() {
-      // base url could be also passed as a parameter instead of hard coded?
-      const baseUrl = "https://9744aaae77a6ee13b1413d6204afe7.a7.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e37615bb303045b4b9bbfefea14bca3a/triggers/manual/paths/invoke/?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dDOIhaTLbKbpOW_w9lYTtP3UBTWhYqaCXGwj7WrNwj8"; 
-      const itemid = getQueryParam("itemid"); // read from query string
-      const fullUrl = baseUrl + "&itemid=" + encodeURIComponent(itemid);
-
+      const params = new URLSearchParams(window.location.search);
+      
+      // extract parameters
+      const baseUrl = params.get(baseurl); 
+      const itemid = params.get(itemid); // read from query string
+      
+      const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
+      const successString = "The holiday has been approved. <Br> You may now close this window."
       // do a GET on the url
       fetch(fullUrl, { method: "GET" })
         .finally(() => {
           // Close the tab/window after triggering
-          window.close();
+          document.getElementById('display-text').textContent = successString;
         });
     };
   </script>
 </head>
 <body>
   <div>
-    <h1>The holiday has been approved. You may now close this window.</h1>
+    <h1 id="display-text">Loading...</h1>
   </div>
 </body>
 </html>

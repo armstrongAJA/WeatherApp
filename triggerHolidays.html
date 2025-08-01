@@ -14,8 +14,8 @@
       
       //buildURL
       const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
-      const successString = "The holiday has been approved.<br>You may now close this window.";
-      const failedString = "The holiday approval failed.<br>Please try again, or contact your system administrator if the problem persists.";
+      const successString = "<b>The holiday has been approved.</b><br><br>You may now close this window.";
+      const failedString = "<b>The holiday approval failed.</b><br><br>Please try again, or contact your system administrator if the problem persists.";
       
       // do a GET on the url to trigger the flow and change the text displayed on the site.
       fetch(fullUrl, { method: "GET" })
@@ -53,6 +53,8 @@
     background-color: #f0f0f0;
     border: 1px solid #ccc;
     border-radius: 10px;
+    max-width: 400px;
+    width: 100%;
   }
 
   header {
@@ -63,6 +65,14 @@
     height: 50px; /* adjust size */
     width: auto;
   }
+
+  p {
+    color: #333;
+    font-size: 25px;
+    font-family: Calibri, sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+  }
 </style>
   
 </head>
@@ -72,7 +82,7 @@
 </header>
 <div class="center-container">
   <div class="centered-box">
-    <h1 id="display-text">Loading...</h1>
+    <p id="display-text">Loading...</p>
   </div>
 </div>
 </body>

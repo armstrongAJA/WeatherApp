@@ -8,17 +8,28 @@
       const params = new URLSearchParams(window.location.search);
       
       // extract parameters
-      const baseUrl = params.get(baseurl); 
-      const itemid = params.get(itemid); // read from query string
+      const baseUrl = params.get("baseurl"); 
+      const itemid = params.get("itemid"); // read from query string
       
+      //buildURL
       const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
-      const successString = "The holiday has been approved. <Br> You may now close this window."
-      // do a GET on the url
+      const successString = "The holiday has been approved. <Br> You may now close this window.";
+      const failedString = "The holiday approval failed. Please try again, or contact your system administrator if the problem persists.";
+      
+      // do a GET on the url to trigger the flow and change the text displayed on the site.
       fetch(fullUrl, { method: "GET" })
-        .finally(() => {
-          // Close the tab/window after triggering
+        .then(() => {
           document.getElementById('display-text').textContent = successString;
+          console.log("The GET request attempt was successful.");
+        })
+        .catch(() => {
+          document.getElementById('display-text').textContent = failedString;
+          console.log("The GET request attempt failed.");
+        })
+        .finally(() => {
+          console.log("The GET request attempt has finished.");
         });
+
     };
   </script>
 </head>

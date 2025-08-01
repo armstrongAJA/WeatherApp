@@ -14,8 +14,8 @@
       const status = params.get("status");
       //buildURL
       const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
-      const successString = `<b>The holiday has been ${approvedText}.</b><br>You may now close this window.`;
-      const failedString = `<b>The holiday was not ${approvedText} as the attempt failed.</b><br>Please try again by refreshing the page, or contact your system administrator if the problem persists.`;
+      const successString = `<b>The holiday has been ${status}.</b><br>You may now close this window.`;
+      const failedString = `<b>The holiday was not ${status} as the attempt failed.</b><br>Please try again by refreshing the page, or contact your system administrator if the problem persists.`;
       
       // do a GET on the url to trigger the flow and change the text displayed on the site.
       fetch(fullUrl, { method: "GET" })

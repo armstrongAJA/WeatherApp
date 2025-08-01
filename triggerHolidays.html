@@ -13,13 +13,14 @@
       
       //buildURL
       const fullUrl = decodeURIComponent(baseUrl) + "&itemid=" + encodeURIComponent(itemid);
-      const successString = "The holiday has been approved. <Br> You may now close this window.";
+      const successString = "The holiday has been approved.<br>You may now close this window.";
       const failedString = "The holiday approval failed. Please try again, or contact your system administrator if the problem persists.";
       
       // do a GET on the url to trigger the flow and change the text displayed on the site.
       fetch(fullUrl, { method: "GET" })
         .then(() => {
-          document.getElementById('display-text').textContent = successString;
+          document.getElementById('display-text').innerHTML = successString;
+          //document.getElementById('display-text').textContent = successString;
           console.log("The GET request attempt was successful.");
         })
         .catch(() => {

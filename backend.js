@@ -11,15 +11,14 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/weather', async (req, res) => {
-  const { lat, lon } = req.query;
+  const { lat, lon, LOCATION } = req.query;
   const apiKey = process.env.METEOBLUEAPIKEY;
 
   if (!lat || !lon) {
-    return res.status(400).json({ error: 'Missing lat or lon parameter' });
+    return res.status(400).json({ error: 'Missing lat, lon or LOCATION parameter' });
   }
-
   try {
-    const url = `https://my.meteoblue.com/packages/basic-day?lat=${lat}&lon=${lon}&format=json&apikey=${apiKey}`;
+    const url = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${lat}&lon=${lon}&name=${LOCATION}&format=json&apikey=${apiKey}&asl=35&tz=Europe/London`;
     const response = await axios.get(url);
     res.json(response.data); // return meteoblue data to frontend
   } catch (err) {

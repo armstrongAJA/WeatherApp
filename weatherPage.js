@@ -36,7 +36,7 @@ function pictocodeToFilename(code) {
   return `${codeStr}_iday.svg`;
 }
   function buildApiUrl() {
-    return `https://weatherapp-3o2e.onrender.com/weather?lat=lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`
+    return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`
     //return `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=${LOCATION}&format=json&apikey=${API_KEY}`;
   }
 

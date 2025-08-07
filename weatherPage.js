@@ -3,7 +3,6 @@
   let LAT = null;
   let LON = null;
   let API_URL = '';
-  const API_KEY = 'Nqye1omCdRA2Jrab';
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');

@@ -8,7 +8,7 @@ export async function initAuth0() {
     domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
     cacheLocation: "localstorage",
     authorizationParams: {
-      redirect_uri: window.location.origin,
+      redirect_uri: window.location.href,
       client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
     },
   });
@@ -16,7 +16,7 @@ export async function initAuth0() {
   // Handle redirect callback when returning from Auth0 login
   if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
     try {
-      await auth0.handleRedirectCallback({ redirect_uri: window.location.origin });
+      await auth0.handleRedirectCallback({ redirect_uri: window.location.href });
       // Remove query params from URL without reload
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (e) {

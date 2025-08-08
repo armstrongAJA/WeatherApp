@@ -6,10 +6,10 @@ let auth0 = null;
 export async function initAuth0() {
   auth0 = await createAuth0Client({
     domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
-    client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
     cacheLocation: "localstorage",
     authorizationParams: {
       redirect_uri: window.location.origin,
+      client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
     },
   });
 

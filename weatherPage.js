@@ -11,7 +11,7 @@ async function initAuth0() {
     domain: "dev-48b12ypfjnzz7foo.us.auth0.com",     // e.g., "dev-abc123.us.auth0.com"
     client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
     cacheLocation: "localstorage", // optional: keeps user logged in after page reload
-  })};
+  });
 
   // Handle the redirect from Auth0 (if any)
   if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
@@ -260,13 +260,17 @@ async function fetchWeatherData() {
     });
   });
 
-  // Initial load
 window.addEventListener('DOMContentLoaded', async () => {
-  // First, initialise Auth0
+  // Wait until Auth0 script defines createAuth0Client
+  while (typeof createAuth0Client === 'undefined') {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+
+  // Now safe to init Auth0
   await initAuth0();
 
-  // Then, if logged in, load weather
   if (await auth0.isAuthenticated()) {
     await init();
   }
 });
+

@@ -3,36 +3,32 @@ import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/aut
 let auth0 = null;
 
 async function initAuth0() {
-    console.log("Initializing Auth0 client...");
+  auth0 = await createAuth0Client({
+    domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
+    client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
+    cacheLocation: "localstorage",
+    authorizationParams: {
+      redirect_uri: window.location.origin
+    },
+  });
+
+  // Check if we are returning from Auth0 login redirect
+  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
     try {
-        auth0 = await createAuth0Client({
-            domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
-            cacheLocation: "localstorage",
-            authorizationParams: {
-                redirect_uri: window.location.origin,
-                client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG"
-            },
-        });
-        console.log("Auth0 client initialized:", auth0);
-    } catch (err) {
-        console.error("Error creating Auth0 client:", err);
-        return;
-    }
+      // Handle the redirect and process tokens
+      await auth0.handleRedirectCallback();
 
-    // Check if redirected back from Auth0 login
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-        console.log("Handling redirect callback...");
-        try {
-            await auth0.handleRedirectCallback();
-            console.log("Redirect callback handled successfully");
-            window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (e) {
-            console.error("Error handling redirect callback:", e);
-        }
-    }
+      // Clean the URL removing query params (without page reload)
+      window.history.replaceState({}, document.title, window.location.pathname);
 
-    await updateUI();
+    } catch (e) {
+      console.error("Error handling Auth0 redirect callback:", e);
+    }
+  }
+
+  await updateUI(); // your function to update page UI/auth state
 }
+
 
 async function updateUI() {
     console.log("Updating UI based on authentication state...");

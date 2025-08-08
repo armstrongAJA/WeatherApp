@@ -23,8 +23,8 @@ async function initAuth0() {
     }
   }
 
-  updateUI();
-
+  await updateUI();  // await to ensure UI updates after auth initialized
+}
 
 async function updateUI() {
   const isAuthenticated = await auth0.isAuthenticated();
@@ -41,6 +41,9 @@ async function updateUI() {
 
     // Store token globally for API calls
     window.accessToken = token;
+
+    // Initialize weather data only after authentication
+    await init();
 
   } else {
     document.getElementById('login-btn').style.display = 'block';
@@ -207,6 +210,7 @@ async function init() {
   const [lat, lon] = await getLatLong(LOCATION);
   if (!lat || !lon) {
     alert('Failed to get location coordinates.');
+    spinner.style.display = 'none';
     return;
   }
   LAT = lat;
@@ -252,9 +256,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
 
-  // Now safe to init Auth0 and attach auth-related event handlers
+  // Initialize Auth0 and UI
   await initAuth0();
-  // Attach login/logout event listeners here after auth0 initialized
+
+  // Attach login/logout event listeners after auth0 is initialized
   document.getElementById('login-btn').addEventListener('click', async () => {
     await auth0.loginWithRedirect({
       redirect_uri: window.location.origin,
@@ -266,8 +271,4 @@ window.addEventListener('DOMContentLoaded', async () => {
       returnTo: window.location.origin,
     });
   });
-};
-  if (await auth0.isAuthenticated()) {
-    await init();
-  }
 });

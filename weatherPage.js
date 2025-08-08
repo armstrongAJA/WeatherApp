@@ -261,6 +261,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Attach login/logout event listeners after auth0 is initialized
   document.getElementById('login-btn').addEventListener('click', async () => {
+    console.log('Login button clicked');
     await auth0.loginWithRedirect({
       redirect_uri: window.location.origin,
     });

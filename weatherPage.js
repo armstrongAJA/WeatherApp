@@ -259,9 +259,12 @@ function pictocodeToFilename(code) {
   });
 
   // Initial load
-  window.onload = async () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  // First, initialise Auth0
   await initAuth0();
+
+  // Then, if logged in, load weather
   if (await auth0.isAuthenticated()) {
-    init();  // Your existing app init to load weather data
+    await init();
   }
-};
+});

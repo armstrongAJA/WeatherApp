@@ -50,6 +50,7 @@ function buildApiUrl() {
 
 // Fetch weather data with token
 async function fetchWeatherData(token) {
+    if (!token) document.getElementById("login-btn").textcontent = "logged in";
     try {
         const res = await fetch(API_URL, {
             headers: {

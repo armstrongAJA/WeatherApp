@@ -229,6 +229,19 @@ async function fetchWeatherData() {
   }
 
   // Event listeners
+window.addEventListener('DOMContentLoaded', async () => {
+  // Wait until Auth0 script defines createAuth0Client
+  while (typeof createAuth0Client === 'undefined') {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+
+  // Now safe to init Auth0
+  await initAuth0();
+
+  if (await auth0.isAuthenticated()) {
+    await init();
+  }
+});
   citySelect.addEventListener('change', async () => {
     LOCATION = citySelect.value;
     await init();
@@ -259,18 +272,4 @@ async function fetchWeatherData() {
       returnTo: window.location.origin,
     });
   });
-
-window.addEventListener('DOMContentLoaded', async () => {
-  // Wait until Auth0 script defines createAuth0Client
-  while (typeof createAuth0Client === 'undefined') {
-    await new Promise(resolve => setTimeout(resolve, 50));
-  }
-
-  // Now safe to init Auth0
-  await initAuth0();
-
-  if (await auth0.isAuthenticated()) {
-    await init();
-  }
-});
 

@@ -1,64 +1,17 @@
-import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.esm.js";
+// weather.js
+import { initAuth0, updateUI, getAuth0Client } from "./auth.js";
 
 // Global variables
 let LOCATION = "Leeds";
 let LAT = null;
 let LON = null;
 let API_URL = "";
-let auth0 = null;
 let weatherCodeMap = {};
 
 const tableBody = document.getElementById("table-body");
 const spinner = document.getElementById("spinner");
 const chart = document.getElementById("chart");
 const citySelect = document.getElementById("city-select");
-
-// Initialize Auth0 client and UI
-async function initAuth0() {
-    auth0 = await createAuth0Client({
-        domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
-        client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
-        cacheLocation: "localstorage",
-    });
-
-    // Handle redirect callback if applicable
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-        try {
-            await auth0.handleRedirectCallback();
-            window.history.replaceState({}, document.title, "/");
-        } catch (err) {
-            console.error("Auth0 redirect callback error", err);
-        }
-    }
-
-    await updateUI();
-}
-
-// Update UI based on auth status
-async function updateUI() {
-    const isAuthenticated = await auth0.isAuthenticated();
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-
-    if (isAuthenticated) {
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-
-        const user = await auth0.getUser();
-        console.log("User info:", user);
-
-        // Get token for API calls
-        const token = await auth0.getTokenSilently();
-        window.accessToken = token;
-        console.log("Access Token:", token);
-
-        // Initialize weather data only after authentication
-        await init();
-    } else {
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-    }
-}
 
 // Format date strings nicely
 function formatDate(dateStr) {
@@ -87,8 +40,7 @@ async function getLatLong(location) {
 
 // Map pictocode to local filename
 function pictocodeToFilename(code) {
-    const codeStr = code.toString().padStart(2, "0"); // e.g. '01', '03'
-    return `${codeStr}_iday.svg`;
+    return code.toString().padStart(2, "0") + "_iday.svg";
 }
 
 // Build API URL for weather
@@ -96,26 +48,25 @@ function buildApiUrl() {
     return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
 }
 
-// Fetch weather data with auth token
-async function fetchWeatherData() {
+// Fetch weather data with token
+async function fetchWeatherData(token) {
     try {
         const res = await fetch(API_URL, {
             headers: {
-                Authorization: `Bearer ${window.accessToken || ""}`,
+                Authorization: `Bearer ${token}`,
             },
         });
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        return data;
+        return await res.json();
     } catch (err) {
-        console.error("Error fetching Meteoblue data:", err);
+        console.error("Error fetching weather data:", err);
         alert("Failed to load weather data.");
         return null;
     }
 }
 
 // Populate weather table
-function populateTable(data, weatherCodeMap) {
+function populateTable(data) {
     tableBody.innerHTML = "";
     const count = data.data_day.time.length;
 
@@ -139,7 +90,6 @@ function populateTable(data, weatherCodeMap) {
         iconImg.alt = weatherInfo;
         iconImg.style.width = "50px";
         iconImg.style.height = "50px";
-        iconImg.style.verticalAlign = "middle";
         iconImg.style.display = "block";
         iconImg.style.margin = "0 auto 5px";
 
@@ -151,7 +101,7 @@ function populateTable(data, weatherCodeMap) {
     }
 }
 
-// Generate chart URL
+// Create chart URL for QuickChart
 function createChartUrl(data) {
     const labels = data.data_day.time.map((d) =>
         new Date(d).toLocaleDateString(undefined, { weekday: "short" })
@@ -161,7 +111,7 @@ function createChartUrl(data) {
     const chartConfig = {
         type: "bar",
         data: {
-            labels: labels,
+            labels,
             datasets: [
                 {
                     label: "Max Temp (°C)",
@@ -182,25 +132,20 @@ function createChartUrl(data) {
     return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
 }
 
-// Load pictogram mapping for weather codes
+// Load weather code mapping from meteoblue
 async function loadWeatherCodeMap() {
     const pictogramUrl =
         "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
     try {
         const res = await fetch(pictogramUrl, {
-            headers: {
-                Accept: "application/json",
-            },
+            headers: { Accept: "application/json" },
         });
         if (!res.ok) throw new Error("Failed to load pictogram data");
 
         const pictogramData = await res.json();
-
         const map = {};
         pictogramData.daily.forEach((entry) => {
-            const code = entry.pictocode;
-            const description = entry.description;
-            map[code] = { text: description };
+            map[entry.pictocode] = { text: entry.description };
         });
         console.log("Pictogram data loaded:", map);
         return map;
@@ -210,8 +155,8 @@ async function loadWeatherCodeMap() {
     }
 }
 
-// Main init for weather data
-async function init() {
+// Initialize weather data and UI, passing accessToken from auth.js
+async function initWeather(accessToken) {
     spinner.style.display = "block";
     chart.style.display = "none";
 
@@ -228,10 +173,10 @@ async function init() {
     LON = lon;
     API_URL = buildApiUrl();
 
-    const data = await fetchWeatherData();
+    const data = await fetchWeatherData(accessToken);
 
     if (data) {
-        populateTable(data, weatherCodeMap);
+        populateTable(data);
         chart.src = createChartUrl(data);
         chart.style.display = "block";
     } else {
@@ -239,13 +184,18 @@ async function init() {
     }
 
     spinner.style.display = "none";
+
     document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
 }
 
-// Event listeners unrelated to auth
+// Event listeners for city select
 citySelect.addEventListener("change", async () => {
     LOCATION = citySelect.value;
-    await init();
+    // Get token and re-init weather data after location change
+    const auth0 = getAuth0Client();
+    if (!auth0) return;
+    const token = await auth0.getTokenSilently();
+    await initWeather(token);
 });
 
 document.getElementById("back-btn").addEventListener("click", () => {
@@ -262,22 +212,33 @@ window.addEventListener("click", (event) => {
     }
 });
 
-// Initialize app after window load
+// On window load, initialize Auth0, then weather if authenticated
 window.addEventListener("load", async () => {
     try {
         await initAuth0();
 
-        // Attach login/logout handlers
+        // Attach login/logout button handlers
         document.getElementById("login-btn").addEventListener("click", async () => {
-            console.log("Login button clicked");
+            const auth0 = getAuth0Client();
+            if (!auth0) return;
             await auth0.loginWithRedirect({ redirect_uri: window.location.origin });
         });
 
         document.getElementById("logout-btn").addEventListener("click", async () => {
-            console.log("Logout button clicked");
-            await auth0.logout({ returnTo: window.location.origin });
+            const auth0 = getAuth0Client();
+            if (!auth0) return;
+            auth0.logout({ returnTo: window.location.origin });
         });
+
+        // Update UI and if authenticated, load weather data
+        const isAuthenticated = await updateUI();
+
+        if (isAuthenticated) {
+            const auth0 = getAuth0Client();
+            const token = await auth0.getTokenSilently();
+            await initWeather(token);
+        }
     } catch (err) {
-        console.error("Error initializing Auth0 or page:", err);
+        console.error("Error initializing app:", err);
     }
 });

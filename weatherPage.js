@@ -11,7 +11,7 @@ async function initAuth0() {
     domain: "dev-48b12ypfjnzz7foo.us.auth0.com",     // e.g., "dev-abc123.us.auth0.com"
     client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
     cacheLocation: "localstorage", // optional: keeps user logged in after page reload
-  });
+  })};
 
   // Handle the redirect from Auth0 (if any)
   if (window.location.search.includes("code=") && window.location.search.includes("state=")) {

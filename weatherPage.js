@@ -3,6 +3,51 @@
   let LAT = null;
   let LON = null;
   let API_URL = '';
+//Add Authorisation via OAUTH0
+let auth0 = null;
+
+async function initAuth0() {
+  auth0 = await createAuth0Client({
+    domain: "dev-48b12ypfjnzz7foo.us.auth0.com",     // e.g., "dev-abc123.us.auth0.com"
+    client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
+    cacheLocation: "localstorage", // optional: keeps user logged in after page reload
+  });
+
+  // Handle the redirect from Auth0 (if any)
+  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+    try {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/");
+    } catch (err) {
+      console.error('Auth0 redirect callback error', err);
+    }
+  }
+
+  updateUI();
+}
+
+async function updateUI() {
+  const isAuthenticated = await auth0.isAuthenticated();
+
+  if (isAuthenticated) {
+    const user = await auth0.getUser();
+    console.log("User info:", user);
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'block';
+
+    // Optionally store the token
+    const token = await auth0.getTokenSilently();
+    console.log("Access Token:", token);
+
+    // You can store token globally to use in API calls
+    window.accessToken = token;
+
+  } else {
+    document.getElementById('login-btn').style.display = 'block';
+    document.getElementById('logout-btn').style.display = 'none';
+  }
+}
+//End of Authorization code
 
   const tableBody = document.getElementById('table-body');
   const spinner = document.getElementById('spinner');
@@ -198,5 +243,22 @@ function pictocodeToFilename(code) {
     }
   });
 
+  document.getElementById('login-btn').addEventListener('click', async () => {
+    await auth0.loginWithRedirect({
+      redirect_uri: window.location.origin,
+    });
+  });
+  
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    auth0.logout({
+      returnTo: window.location.origin,
+    });
+  });
+
   // Initial load
-  init();
+  window.onload = async () => {
+  await initAuth0();
+  if (await auth0.isAuthenticated()) {
+    init();  // Your existing app init to load weather data
+  }
+};

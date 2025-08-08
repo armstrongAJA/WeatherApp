@@ -266,7 +266,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       returnTo: window.location.origin,
     });
   });
-}
+};
   if (await auth0.isAuthenticated()) {
     await init();
   }

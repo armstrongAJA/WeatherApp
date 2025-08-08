@@ -84,24 +84,23 @@ function pictocodeToFilename(code) {
     //return `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${LAT}&lon=${LON}&asl=35&tz=Europe/London&name=${LOCATION}&format=json&apikey=${API_KEY}`;
   }
 
-  async function fetchWeatherData() {
-      try {
-        const res = await fetch(
-          API_URL, {
-            headers: {
-              Authorization: `Bearer ${window.accessToken || ''}`
-            }
-          }
-        );
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      console.error('Error fetching Meteoblue data:', err);
-      alert('Failed to load weather data.');
-      return null;
-    }
+async function fetchWeatherData() {
+  try {
+    const res = await fetch(API_URL, {
+      headers: {
+        Authorization: `Bearer ${window.accessToken || ''}`
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching Meteoblue data:', err);
+    alert('Failed to load weather data.');
+    return null;
   }
+}
+
 
   function populateTable(data, weatherCodeMap) {
   tableBody.innerHTML = '';

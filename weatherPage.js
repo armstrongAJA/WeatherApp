@@ -258,7 +258,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize Auth0 and UI
   await initAuth0();
-
+  console.log("✅ Auth0 is ready");
   // Attach login/logout event listeners after auth0 is initialized
   document.getElementById('login-btn').addEventListener('click', async () => {
     console.log('Login button clicked');

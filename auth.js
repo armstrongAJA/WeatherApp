@@ -16,7 +16,7 @@ async function initAuth0() {
   if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
     try {
       // Handle the redirect and process tokens
-      await auth0.handleRedirectCallback();
+      await auth0.handleRedirectCallback( redirect_uri: window.location.origin );
 
       // Clean the URL removing query params (without page reload)
       window.history.replaceState({}, document.title, window.location.pathname);

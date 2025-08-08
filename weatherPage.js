@@ -1,275 +1,283 @@
+import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.esm.js";
+
 // Global variables
-let LOCATION = 'Leeds';
+let LOCATION = "Leeds";
 let LAT = null;
 let LON = null;
-let API_URL = '';
-// Add Authorization via AUTH0
+let API_URL = "";
 let auth0 = null;
+let weatherCodeMap = {};
 
+const tableBody = document.getElementById("table-body");
+const spinner = document.getElementById("spinner");
+const chart = document.getElementById("chart");
+const citySelect = document.getElementById("city-select");
+
+// Initialize Auth0 client and UI
 async function initAuth0() {
-  auth0 = await createAuth0Client({
-    domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
-    client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
-    cacheLocation: "localstorage", // keeps user logged in after reload
-  });
+    auth0 = await createAuth0Client({
+        domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
+        client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
+        cacheLocation: "localstorage",
+    });
 
-  // Handle the redirect from Auth0 (if any)
-  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-    try {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
-    } catch (err) {
-      console.error('Auth0 redirect callback error', err);
+    // Handle redirect callback if applicable
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+        try {
+            await auth0.handleRedirectCallback();
+            window.history.replaceState({}, document.title, "/");
+        } catch (err) {
+            console.error("Auth0 redirect callback error", err);
+        }
     }
-  }
 
-  await updateUI();  // await to ensure UI updates after auth initialized
+    await updateUI();
 }
 
+// Update UI based on auth status
 async function updateUI() {
-  const isAuthenticated = await auth0.isAuthenticated();
+    const isAuthenticated = await auth0.isAuthenticated();
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
 
-  if (isAuthenticated) {
-    const user = await auth0.getUser();
-    console.log("User info:", user);
-    document.getElementById('login-btn').style.display = 'none';
-    document.getElementById('logout-btn').style.display = 'block';
+    if (isAuthenticated) {
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
 
-    // Optionally store the token
-    const token = await auth0.getTokenSilently();
-    console.log("Access Token:", token);
+        const user = await auth0.getUser();
+        console.log("User info:", user);
 
-    // Store token globally for API calls
-    window.accessToken = token;
+        // Get token for API calls
+        const token = await auth0.getTokenSilently();
+        window.accessToken = token;
+        console.log("Access Token:", token);
 
-    // Initialize weather data only after authentication
-    await init();
-
-  } else {
-    document.getElementById('login-btn').style.display = 'block';
-    document.getElementById('logout-btn').style.display = 'none';
-  }
-}
-
-const tableBody = document.getElementById('table-body');
-const spinner = document.getElementById('spinner');
-const chart = document.getElementById('chart');
-const citySelect = document.getElementById('city-select');
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-function getLatLong(location) {
-  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
-
-  return fetch(geocodeUrl)
-    .then(res => res.json())
-    .then(result => {
-      if (!result[0]) throw new Error(`No results for ${location}`);
-      const { lat, lon } = result[0];
-      return [parseFloat(lat), parseFloat(lon)];
-    })
-    .catch(err => {
-      console.error('Geocoding error:', err);
-      return [null, null];
-    });
-}
-
-function pictocodeToFilename(code) {
-  const codeStr = code.toString().padStart(2, '0'); // e.g. '01', '03'
-  return `${codeStr}_iday.svg`;
-}
-
-function buildApiUrl() {
-  return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
-}
-
-async function fetchWeatherData() {
-  try {
-    const res = await fetch(API_URL, {
-      headers: {
-        Authorization: `Bearer ${window.accessToken || ''}`
-      }
-    });
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error('Error fetching Meteoblue data:', err);
-    alert('Failed to load weather data.');
-    return null;
-  }
-}
-
-function populateTable(data, weatherCodeMap) {
-  tableBody.innerHTML = '';
-  const count = data.data_day.time.length;
-
-  for (let i = 0; i < count; i++) {
-    const tr = document.createElement('tr');
-
-    // Date cell
-    const tdDate = document.createElement('td');
-    tdDate.textContent = formatDate(data.data_day.time[i]);
-    tr.appendChild(tdDate);
-
-    // Max temperature cell
-    const tdTemp = document.createElement('td');
-    tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
-    tr.appendChild(tdTemp);
-
-    // Weather cell with icon and text
-    const tdWeather = document.createElement('td');
-    const code = data.data_day.pictocode[i];
-    const weatherInfo = weatherCodeMap[code]?.text || 'Unknown';
-
-    // Create img element for the icon
-    const iconImg = document.createElement('img');
-    iconImg.src = `./${pictocodeToFilename(code)}`;
-    iconImg.alt = weatherInfo;
-    iconImg.style.width = '50px';
-    iconImg.style.height = '50px';
-    iconImg.style.verticalAlign = 'middle';
-    iconImg.style.display = 'block';
-    iconImg.style.margin = '0 auto 5px';
-
-    tdWeather.appendChild(iconImg);
-    tdWeather.appendChild(document.createTextNode(weatherInfo));
-    tr.appendChild(tdWeather);
-
-    tableBody.appendChild(tr);
-  }
-}
-
-function createChartUrl(data) {
-  const labels = data.data_day.time.map(d => {
-    return new Date(d).toLocaleDateString(undefined, { weekday: 'short' });
-  });
-
-  const temps = data.data_day.temperature_max;
-
-  const chartConfig = {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Max Temp (°C)',
-        data: temps,
-        backgroundColor: 'rgba(0, 123, 255, 0.7)',
-        borderColor: 'rgba(0, 123, 255, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: { beginAtZero: false }
-      }
+        // Initialize weather data only after authentication
+        await init();
+    } else {
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
     }
-  };
-
-  return 'https://quickchart.io/chart?c=' + encodeURIComponent(JSON.stringify(chartConfig));
 }
 
+// Format date strings nicely
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+    });
+}
+
+// Geocode city to lat/lon
+async function getLatLong(location) {
+    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+    try {
+        const res = await fetch(geocodeUrl);
+        const result = await res.json();
+        if (!result[0]) throw new Error(`No results for ${location}`);
+        const { lat, lon } = result[0];
+        return [parseFloat(lat), parseFloat(lon)];
+    } catch (err) {
+        console.error("Geocoding error:", err);
+        return [null, null];
+    }
+}
+
+// Map pictocode to local filename
+function pictocodeToFilename(code) {
+    const codeStr = code.toString().padStart(2, "0"); // e.g. '01', '03'
+    return `${codeStr}_iday.svg`;
+}
+
+// Build API URL for weather
+function buildApiUrl() {
+    return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
+}
+
+// Fetch weather data with auth token
+async function fetchWeatherData() {
+    try {
+        const res = await fetch(API_URL, {
+            headers: {
+                Authorization: `Bearer ${window.accessToken || ""}`,
+            },
+        });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.error("Error fetching Meteoblue data:", err);
+        alert("Failed to load weather data.");
+        return null;
+    }
+}
+
+// Populate weather table
+function populateTable(data, weatherCodeMap) {
+    tableBody.innerHTML = "";
+    const count = data.data_day.time.length;
+
+    for (let i = 0; i < count; i++) {
+        const tr = document.createElement("tr");
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formatDate(data.data_day.time[i]);
+        tr.appendChild(tdDate);
+
+        const tdTemp = document.createElement("td");
+        tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
+        tr.appendChild(tdTemp);
+
+        const tdWeather = document.createElement("td");
+        const code = data.data_day.pictocode[i];
+        const weatherInfo = weatherCodeMap[code]?.text || "Unknown";
+
+        const iconImg = document.createElement("img");
+        iconImg.src = `./${pictocodeToFilename(code)}`;
+        iconImg.alt = weatherInfo;
+        iconImg.style.width = "50px";
+        iconImg.style.height = "50px";
+        iconImg.style.verticalAlign = "middle";
+        iconImg.style.display = "block";
+        iconImg.style.margin = "0 auto 5px";
+
+        tdWeather.appendChild(iconImg);
+        tdWeather.appendChild(document.createTextNode(weatherInfo));
+        tr.appendChild(tdWeather);
+
+        tableBody.appendChild(tr);
+    }
+}
+
+// Generate chart URL
+function createChartUrl(data) {
+    const labels = data.data_day.time.map((d) =>
+        new Date(d).toLocaleDateString(undefined, { weekday: "short" })
+    );
+    const temps = data.data_day.temperature_max;
+
+    const chartConfig = {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Max Temp (°C)",
+                    data: temps,
+                    backgroundColor: "rgba(0, 123, 255, 0.7)",
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: false },
+            },
+        },
+    };
+
+    return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
+}
+
+// Load pictogram mapping for weather codes
 async function loadWeatherCodeMap() {
-  const pictogramUrl = "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
+    const pictogramUrl =
+        "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic";
+    try {
+        const res = await fetch(pictogramUrl, {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+        if (!res.ok) throw new Error("Failed to load pictogram data");
 
-  try {
-    const res = await fetch(pictogramUrl, {
-      headers: {
-        "Accept": "application/json"
-      }
-    });
+        const pictogramData = await res.json();
 
-    if (!res.ok) throw new Error('Failed to load pictogram data');
-
-    const pictogramData = await res.json();
-
-    const map = {};
-    pictogramData.daily.forEach(entry => {
-      const code = entry.pictocode;
-      const description = entry.description;
-      map[code] = { text: description };
-    });
-    console.log('pictogramdata:', map);
-
-    return map;
-
-  } catch (error) {
-    console.error('Error loading pictocode map:', error);
-    return {};
-  }
+        const map = {};
+        pictogramData.daily.forEach((entry) => {
+            const code = entry.pictocode;
+            const description = entry.description;
+            map[code] = { text: description };
+        });
+        console.log("Pictogram data loaded:", map);
+        return map;
+    } catch (error) {
+        console.error("Error loading pictocode map:", error);
+        return {};
+    }
 }
 
+// Main init for weather data
 async function init() {
-  spinner.style.display = 'block';
-  chart.style.display = 'none';
-  weatherCodeMap = await loadWeatherCodeMap();
-  console.log(weatherCodeMap);
-  const [lat, lon] = await getLatLong(LOCATION);
-  if (!lat || !lon) {
-    alert('Failed to get location coordinates.');
-    spinner.style.display = 'none';
-    return;
-  }
-  LAT = lat;
-  LON = lon;
-  API_URL = buildApiUrl();
+    spinner.style.display = "block";
+    chart.style.display = "none";
 
-  const data = await fetchWeatherData();
-  if (data) {
-    populateTable(data, weatherCodeMap);
-    chart.src = createChartUrl(data);
-    chart.style.display = 'block';
-  } else {
-    tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
-  }
+    weatherCodeMap = await loadWeatherCodeMap();
 
-  spinner.style.display = 'none';
-  document.getElementById('pageHeader').textContent = `7-Day Weather Forecast (${LOCATION})`;
+    const [lat, lon] = await getLatLong(LOCATION);
+    if (!lat || !lon) {
+        alert("Failed to get location coordinates.");
+        spinner.style.display = "none";
+        return;
+    }
+
+    LAT = lat;
+    LON = lon;
+    API_URL = buildApiUrl();
+
+    const data = await fetchWeatherData();
+
+    if (data) {
+        populateTable(data, weatherCodeMap);
+        chart.src = createChartUrl(data);
+        chart.style.display = "block";
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
+    }
+
+    spinner.style.display = "none";
+    document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
 }
 
 // Event listeners unrelated to auth
-citySelect.addEventListener('change', async () => {
-  LOCATION = citySelect.value;
-  await init();
+citySelect.addEventListener("change", async () => {
+    LOCATION = citySelect.value;
+    await init();
 });
 
-document.getElementById('back-btn').addEventListener('click', () => {
-  document.getElementById('modal').style.display = 'flex';
+document.getElementById("back-btn").addEventListener("click", () => {
+    document.getElementById("modal").style.display = "flex";
 });
 
-document.getElementById('ok-btn').addEventListener('click', () => {
-  window.location.href = 'index.html';
+document.getElementById("ok-btn").addEventListener("click", () => {
+    window.location.href = "index.html";
 });
 
-window.addEventListener('click', (event) => {
-  if (event.target === document.getElementById('modal')) {
-    document.getElementById('modal').style.display = 'none';
-  }
+window.addEventListener("click", (event) => {
+    if (event.target === document.getElementById("modal")) {
+        document.getElementById("modal").style.display = "none";
+    }
 });
 
-window.addEventListener('DOMContentLoaded', async () => {
-  // Wait until Auth0 script defines createAuth0Client
-  while (typeof createAuth0Client === 'undefined') {
-    await new Promise(resolve => setTimeout(resolve, 50));
-  }
+// Initialize app after window load
+window.addEventListener("load", async () => {
+    try {
+        await initAuth0();
 
-  // Initialize Auth0 and UI
-  await initAuth0();
-  console.log("✅ Auth0 is ready");
-  // Attach login/logout event listeners after auth0 is initialized
-  document.getElementById('login-btn').addEventListener('click', async () => {
-    console.log('Login button clicked');
-    await auth0.loginWithRedirect({
-      redirect_uri: window.location.origin,
-    });
-  });
+        // Attach login/logout handlers
+        document.getElementById("login-btn").addEventListener("click", async () => {
+            console.log("Login button clicked");
+            await auth0.loginWithRedirect({ redirect_uri: window.location.origin });
+        });
 
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    auth0.logout({
-      returnTo: window.location.origin,
-    });
-  });
+        document.getElementById("logout-btn").addEventListener("click", async () => {
+            console.log("Logout button clicked");
+            await auth0.logout({ returnTo: window.location.origin });
+        });
+    } catch (err) {
+        console.error("Error initializing Auth0 or page:", err);
+    }
 });

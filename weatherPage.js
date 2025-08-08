@@ -1,5 +1,5 @@
 // weather.js
-import { initAuth0, updateUI} from "./auth.js";
+import { initAuth0, updateUI, getAuth0Client } from "./auth.js";
 
 // Global variables
 let LOCATION = "Leeds";

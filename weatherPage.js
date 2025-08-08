@@ -25,19 +25,6 @@ async function initAuth0() {
 
   updateUI();
 
-  // Attach login/logout event listeners here after auth0 initialized
-  document.getElementById('login-btn').addEventListener('click', async () => {
-    await auth0.loginWithRedirect({
-      redirect_uri: window.location.origin,
-    });
-  });
-
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    auth0.logout({
-      returnTo: window.location.origin,
-    });
-  });
-}
 
 async function updateUI() {
   const isAuthenticated = await auth0.isAuthenticated();
@@ -267,7 +254,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Now safe to init Auth0 and attach auth-related event handlers
   await initAuth0();
+  // Attach login/logout event listeners here after auth0 initialized
+  document.getElementById('login-btn').addEventListener('click', async () => {
+    await auth0.loginWithRedirect({
+      redirect_uri: window.location.origin,
+    });
+  });
 
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    auth0.logout({
+      returnTo: window.location.origin,
+    });
+  });
+}
   if (await auth0.isAuthenticated()) {
     await init();
   }

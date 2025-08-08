@@ -86,7 +86,10 @@ function pictocodeToFilename(code) {
 
   async function fetchWeatherData() {
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(API_URL, {
+      headers: {
+        Authorization: `Bearer ${window.accessToken || ''}`
+      });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       return data;

@@ -233,12 +233,11 @@ window.addEventListener("load", async () => {
 
         // Update UI and if authenticated, load weather data
         const isAuthenticated = await updateUI();
-
+            console.log("Authenticated?", isAuthenticated);
+            console.log("Token", token);
         if (isAuthenticated) {
             const auth0 = getAuth0Client();
             const token = await auth0.getTokenSilently();
-            console.log("Authenticated?", isAuthenticated);
-            console.log("Token", token);
             await initWeather(token);
         }
     } catch (err) {

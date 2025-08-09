@@ -2,7 +2,7 @@ import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/aut
 
 let auth0 = null;
 
-async function initAuth0() {
+export async function initAuth0() {
     console.log("Initializing Auth0 client...");
     try {
         auth0 = await createAuth0Client({
@@ -34,7 +34,7 @@ async function initAuth0() {
     await updateUI();
 }
 
-async function updateUI() {
+export async function updateUI() {
     console.log("Updating UI based on authentication state...");
     try {
         const isAuthenticated = await auth0.isAuthenticated();
@@ -57,7 +57,7 @@ async function updateUI() {
     }
 }
 
-async function getAuth0Client() {
+export async function getAuth0Client() {
     return auth0
 }
 

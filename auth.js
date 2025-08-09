@@ -1,10 +1,10 @@
+// auth.js
 import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.esm.js";
 
 let auth0 = null;
 
 export async function initAuth0() {
-    const redirectUri = "https://armstrongaja.github.io/WeatherApp/about.html"; // Full current page
-
+    const redirectUri = window.location.origin + window.location.pathname;
     console.log("Initializing Auth0 with redirect URI:", redirectUri);
 
     try {
@@ -14,7 +14,7 @@ export async function initAuth0() {
             useRefreshTokens: true,
             authorizationParams: {
                 client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
-                redirect_uri: redirectUri // must match exactly what is in Auth0 Allowed Callback URLs
+                redirect_uri: redirectUri
             }
         });
     } catch (err) {
@@ -22,20 +22,20 @@ export async function initAuth0() {
         return false;
     }
 
-    // Handle Auth0 redirect
+    // ✅ Handle redirect from Auth0 first
     if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
         console.log("Processing Auth0 redirect...");
         try {
             const { appState } = await auth0.handleRedirectCallback();
             console.log("Redirect handled successfully:", appState);
-
-            // Remove query params
+            // Clean up URL
             window.history.replaceState({}, document.title, appState?.targetUrl || redirectUri);
         } catch (e) {
             console.error("Error handling redirect callback:", e);
         }
     }
 
+    // ✅ Only after handling callback, update UI
     return await updateUI();
 }
 
@@ -49,7 +49,6 @@ export async function updateUI() {
     if (isAuthenticated) {
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
-
         const user = await auth0.getUser();
         console.log("User info:", user);
     } else {
@@ -74,7 +73,9 @@ export async function login() {
 
 export function logout() {
     auth0.logout({
-        logoutParams: { returnTo: window.location.origin }
+        logoutParams: {
+            returnTo: window.location.origin + window.location.pathname
+        }
     });
 }
 

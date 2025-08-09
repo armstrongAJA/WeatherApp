@@ -25,6 +25,8 @@ export async function initAuth0() {
   }
 
   await updateUI();
+  const isAuthenticated = await auth0.isAuthenticated();
+  return isAuthenticated;
 }
 
 export async function updateUI() {

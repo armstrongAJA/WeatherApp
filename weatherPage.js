@@ -237,6 +237,8 @@ window.addEventListener("load", async () => {
         if (isAuthenticated) {
             const auth0 = getAuth0Client();
             const token = await auth0.getTokenSilently();
+            console.log("Authenticated?", isAuthenticated);
+            console.log("Token", token);
             await initWeather(token);
         }
     } catch (err) {

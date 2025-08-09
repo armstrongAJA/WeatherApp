@@ -9,7 +9,7 @@ export async function initAuth0() {
             domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
             cacheLocation: "localstorage",
             authorizationParams: {
-                redirect_uri: window.location.origin,
+                redirect_uri: window.location.origin + window.location.pathname,
                 client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG"
             },
         });
@@ -77,6 +77,6 @@ window.addEventListener("load", async () => {
 
     document.getElementById("logout-btn").addEventListener("click", () => {
         console.log("Logout button clicked");
-        auth0.logout({ returnTo: window.location.origin });
+        auth0.logout({ returnTo: window.location.origin + window.location.pathname });
     });
 });

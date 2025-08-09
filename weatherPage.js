@@ -222,13 +222,13 @@ window.addEventListener("load", async () => {
         document.getElementById("login-btn").addEventListener("click", async () => {
             const auth0 = getAuth0Client();
             if (!auth0) return;
-            await auth0.loginWithRedirect({ redirect_uri: window.location.origin });
+            await auth0.loginWithRedirect({ redirect_uri: window.location.origin + window.location.pathname });
         });
 
         document.getElementById("logout-btn").addEventListener("click", async () => {
             const auth0 = getAuth0Client();
             if (!auth0) return;
-            auth0.logout({ returnTo: window.location.origin });
+            auth0.logout({ returnTo: window.location.origin + window.location.pathname });
         });
 
         // Update UI and if authenticated, load weather data

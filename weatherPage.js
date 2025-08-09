@@ -1,5 +1,5 @@
-// weather.js file
-import { initAuth0, updateUI, getAuth0Client } from "./auth.js";
+// weather.js
+import { initAuth0, updateUI, getAuth0Client, login, logout } from "./auth.js";
 
 // Global variables
 let LOCATION = "Leeds";
@@ -50,7 +50,9 @@ function buildApiUrl() {
 
 // Fetch weather data with token
 async function fetchWeatherData(token) {
-    if (!token) document.getElementById("login-btn").textcontent = "logged in";
+    if (!token) {
+        document.getElementById("login-btn").textContent = "logged in";  // fixed casing
+    }
     try {
         const res = await fetch(API_URL, {
             headers: {
@@ -192,7 +194,6 @@ async function initWeather(accessToken) {
 // Event listeners for city select
 citySelect.addEventListener("change", async () => {
     LOCATION = citySelect.value;
-    // Get token and re-init weather data after location change
     const auth0 = getAuth0Client();
     if (!auth0) return;
     const token = await auth0.getTokenSilently();
@@ -218,25 +219,18 @@ window.addEventListener("load", async () => {
     try {
         const isAuthenticated = await initAuth0();
 
-        // Attach login/logout button handlers
+        // Attach login/logout button handlers using exported auth.js functions
         document.getElementById("login-btn").addEventListener("click", async () => {
-            const auth0 = getAuth0Client();
-            if (!auth0) return;
-            await auth0.loginWithRedirect({ redirect_uri: window.location.origin + window.location.pathname });
+            await login();
         });
 
-        document.getElementById("logout-btn").addEventListener("click", async () => {
-            const auth0 = getAuth0Client();
-            if (!auth0) return;
-            auth0.logout({ returnTo: window.location.origin + window.location.pathname });
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            logout();
         });
 
-        // Update UI and if authenticated, load weather data
-            //const auth0 = getAuth0Client();
-            //const token = await auth0.getTokenSilently();
-            console.log("Authenticated?", isAuthenticated);
-            //console.log("Token", accessToken);
-            await updateUI();
+        console.log("Authenticated?", isAuthenticated);
+        await updateUI();
+
         if (isAuthenticated) {
             const auth0 = getAuth0Client();
             const token = await auth0.getTokenSilently();

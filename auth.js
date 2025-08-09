@@ -14,7 +14,8 @@ export async function initAuth0() {
             useRefreshTokens: true,
             authorizationParams: {
                 client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
-                redirect_uri: redirectUri
+                redirect_uri: redirectUri,
+                audience: "https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/"
             }
         });
     } catch (err) {

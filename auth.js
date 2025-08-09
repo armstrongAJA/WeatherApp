@@ -3,7 +3,7 @@ import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/aut
 let auth0 = null;
 
 export async function initAuth0() {
-    const redirectUri = window.location.origin + window.location.pathname; // Full current page
+    const redirectUri = https://armstrongaja.github.io/WeatherApp/about.html; // Full current page
 
     console.log("Initializing Auth0 with redirect URI:", redirectUri);
 

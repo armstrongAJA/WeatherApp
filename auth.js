@@ -1,69 +1,78 @@
-// auth.js
 import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.esm.js";
 
 let auth0 = null;
 
-export async function initAuth0() {
-  const redirectUri = window.location.origin + window.location.pathname; // exact current page
-
-  auth0 = await createAuth0Client({
-    domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
-    cacheLocation: "localstorage",
-    authorizationParams: {
-      redirect_uri: redirectUri,
-      client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG"
-    }
-  });
-
-  // Handle redirect from Auth0
-  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+async function initAuth0() {
+    console.log("Initializing Auth0 client...");
     try {
-      await auth0.handleRedirectCallback(); // SDK already knows redirect_uri
+        auth0 = await createAuth0Client({
+            domain: "dev-48b12ypfjnzz7foo.us.auth0.com",
+            cacheLocation: "localstorage",
+            authorizationParams: {
+                redirect_uri: window.location.origin,
+                client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG"
+            },
+        });
+        console.log("Auth0 client initialized:", auth0);
     } catch (err) {
-      console.error("Error handling Auth0 redirect callback:", err);
+        console.error("Error creating Auth0 client:", err);
+        return;
     }
 
-    // Remove ?code=...&state=... from the URL
-    window.history.replaceState({}, document.title, redirectUri);
-  }
+    // Check if redirected back from Auth0 login
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+        console.log("Handling redirect callback...");
+        try {
+            await auth0.handleRedirectCallback();
+            console.log("Redirect callback handled successfully");
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (e) {
+            console.error("Error handling redirect callback:", e);
+        }
+    }
 
-  // Return whether authenticated
-  return await auth0.isAuthenticated();
+    await updateUI();
 }
 
-export async function updateUI() {
-  if (!auth0) {
-    console.warn("Auth0 client not initialized");
-    return false;
-  }
+async function updateUI() {
+    console.log("Updating UI based on authentication state...");
+    try {
+        const isAuthenticated = await auth0.isAuthenticated();
+        console.log("Is authenticated:", isAuthenticated);
+        const loginBtn = document.getElementById("login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
 
-  const isAuthenticated = await auth0.isAuthenticated();
-  const loginBtn = document.getElementById("login-btn");
-  const logoutBtn = document.getElementById("logout-btn");
+        if (isAuthenticated) {
+            loginBtn.style.display = "none";
+            logoutBtn.style.display = "inline-block";
 
-  if (isAuthenticated) {
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-
-    const user = await auth0.getUser();
-    console.log("User info:", user);
-  } else {
-    loginBtn.style.display = "inline-block";
-    logoutBtn.style.display = "none";
-  }
-
-  return isAuthenticated;
+            const user = await auth0.getUser();
+            console.log("User info:", user);
+        } else {
+            loginBtn.style.display = "inline-block";
+            logoutBtn.style.display = "none";
+        }
+    } catch (err) {
+        console.error("Error updating UI:", err);
+    }
 }
 
-export async function login() {
-  const redirectUri = window.location.origin + window.location.pathname;
-  await auth0.loginWithRedirect({ redirect_uri: redirectUri });
-}
+window.addEventListener("load", async () => {
+    console.log("Window loaded, starting Auth0 initialization...");
+    await initAuth0();
 
-export function logout() {
-  auth0.logout({ logoutParams: { returnTo: window.location.origin } });
-}
+    document.getElementById("login-btn").addEventListener("click", async () => {
+        console.log("Login button clicked");
+        try {
+            await auth0.loginWithRedirect();
+            console.log("Login redirect initiated");
+        } catch (e) {
+            console.error("Login failed:", e);
+        }
+    });
 
-export function getAuth0Client() {
-  return auth0;
-}
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        console.log("Logout button clicked");
+        auth0.logout({ returnTo: window.location.origin });
+    });
+});

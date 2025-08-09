@@ -57,6 +57,10 @@ async function updateUI() {
     }
 }
 
+async function export getAuth0Client() {
+    return auth0
+}
+
 window.addEventListener("load", async () => {
     console.log("Window loaded, starting Auth0 initialization...");
     await initAuth0();

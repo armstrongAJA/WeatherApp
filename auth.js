@@ -57,7 +57,7 @@ async function updateUI() {
     }
 }
 
-async function export getAuth0Client() {
+async function getAuth0Client() {
     return auth0
 }
 

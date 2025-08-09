@@ -216,7 +216,7 @@ window.addEventListener("click", (event) => {
 // On window load, initialize Auth0, then weather if authenticated
 window.addEventListener("load", async () => {
     try {
-        await initAuth0();
+        const isAuthenticated = await initAuth0();
 
         // Attach login/logout button handlers
         document.getElementById("login-btn").addEventListener("click", async () => {
@@ -232,11 +232,11 @@ window.addEventListener("load", async () => {
         });
 
         // Update UI and if authenticated, load weather data
-        const isAuthenticated = await updateUI();
             //const auth0 = getAuth0Client();
             //const token = await auth0.getTokenSilently();
             console.log("Authenticated?", isAuthenticated);
             //console.log("Token", accessToken);
+            await updateUI();
         if (isAuthenticated) {
             const auth0 = getAuth0Client();
             const token = await auth0.getTokenSilently();

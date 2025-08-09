@@ -233,8 +233,10 @@ window.addEventListener("load", async () => {
 
         // Update UI and if authenticated, load weather data
         const isAuthenticated = await updateUI();
+            const auth0 = getAuth0Client();
+            const token = await auth0.getTokenSilently();
             console.log("Authenticated?", isAuthenticated);
-            console.log("Token", token);
+            console.log("Token", accessToken);
         if (isAuthenticated) {
             const auth0 = getAuth0Client();
             const token = await auth0.getTokenSilently();

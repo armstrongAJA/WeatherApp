@@ -2,30 +2,9 @@
 import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.esm.js";
 
 let auth0 = null;
+let pkceVerifier = null; // store PKCE code_verifier
 
 export async function initAuth0() {
-    // debugging cors code
-(function() {
-    const origFetch = window.fetch;
-    window.fetch = async function(...args) {
-        const [url, options] = args;
-        if (typeof url === "string" && url.includes("/oauth/token")) {
-            console.log("🔍 Intercepted Auth0 token request:");
-            console.log("URL:", url);
-            console.log("Options:", options);
-            if (options && options.body) {
-                try {
-                    const bodyParams = new URLSearchParams(options.body);
-                    console.log("Body params:", Object.fromEntries(bodyParams));
-                } catch (e) {
-                    console.log("Raw body:", options.body);
-                }
-            }
-        }
-        return origFetch.apply(this, args);
-    };
-})();
-//end of debug code
     const redirectUri = window.location.origin + window.location.pathname;
     console.log("Initializing Auth0 with redirect URI:", redirectUri);
 
@@ -37,7 +16,8 @@ export async function initAuth0() {
             authorizationParams: {
                 client_id: "noq30FodeeaQqjfpwSCXEV1uXWqs42rG",
                 redirect_uri: redirectUri,
-                audience: "https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/"
+                audience: "https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/",
+                code_challenge_method: "S256"
             }
         });
     } catch (err) {
@@ -45,20 +25,38 @@ export async function initAuth0() {
         return false;
     }
 
-    // ✅ Handle redirect from Auth0 first
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+    // If returning from Auth0 with ?code= and ?state=
+    const query = new URLSearchParams(window.location.search);
+    if (query.has("code") && query.has("state")) {
         console.log("Processing Auth0 redirect...");
+
+        // Instead of calling handleRedirectCallback (which tries to fetch a token in-browser)
+        // we send the code & stored PKCE verifier to the backend
+        const authCode = query.get("code");
+        const storedVerifier = sessionStorage.getItem("pkce_verifier");
+
+        console.log("Auth code:", authCode);
+        console.log("PKCE verifier:", storedVerifier);
+
         try {
-            const { appState } = await auth0.handleRedirectCallback();
-            console.log("Redirect handled successfully:", appState);
-            // Clean up URL
-            window.history.replaceState({}, document.title, appState?.targetUrl || redirectUri);
-        } catch (e) {
-            console.error("Error handling redirect callback:", e);
+            await fetch("/exchange-token", { // <-- your backend endpoint
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    code: authCode,
+                    code_verifier: storedVerifier,
+                    redirect_uri: redirectUri
+                })
+            });
+            console.log("Code & verifier sent to backend successfully.");
+        } catch (err) {
+            console.error("Error sending code to backend:", err);
         }
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, redirectUri);
     }
 
-    // ✅ Only after handling callback, update UI
     return await updateUI();
 }
 
@@ -86,11 +84,19 @@ export async function login() {
     const redirectUri = window.location.origin + window.location.pathname;
     console.log("Logging in with redirect URI:", redirectUri);
 
+    // Generate PKCE code_verifier & challenge
+    pkceVerifier = generateRandomString(64);
+    const challenge = await pkceChallengeFromVerifier(pkceVerifier);
+
+    // Save verifier in sessionStorage for post-login use
+    sessionStorage.setItem("pkce_verifier", pkceVerifier);
+
     await auth0.loginWithRedirect({
         authorizationParams: {
-            redirect_uri: redirectUri
+            redirect_uri: redirectUri,
+            code_challenge: challenge,
+            code_challenge_method: "S256"
         }
-        //appState: { targetUrl: window.location.pathname }
     });
 }
 
@@ -104,4 +110,23 @@ export function logout() {
 
 export function getAuth0Client() {
     return auth0;
+}
+
+// Helpers for PKCE
+function generateRandomString(length) {
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+    let result = "";
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    values.forEach(v => result += charset[v % charset.length]);
+    return result;
+}
+
+async function pkceChallengeFromVerifier(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
 }

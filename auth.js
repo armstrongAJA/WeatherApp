@@ -4,6 +4,28 @@ import { createAuth0Client } from "https://cdn.auth0.com/js/auth0-spa-js/2.0/aut
 let auth0 = null;
 
 export async function initAuth0() {
+    // debugging cors code
+(function() {
+    const origFetch = window.fetch;
+    window.fetch = async function(...args) {
+        const [url, options] = args;
+        if (typeof url === "string" && url.includes("/oauth/token")) {
+            console.log("🔍 Intercepted Auth0 token request:");
+            console.log("URL:", url);
+            console.log("Options:", options);
+            if (options && options.body) {
+                try {
+                    const bodyParams = new URLSearchParams(options.body);
+                    console.log("Body params:", Object.fromEntries(bodyParams));
+                } catch (e) {
+                    console.log("Raw body:", options.body);
+                }
+            }
+        }
+        return origFetch.apply(this, args);
+    };
+})();
+//end of debug code
     const redirectUri = window.location.origin + window.location.pathname;
     console.log("Initializing Auth0 with redirect URI:", redirectUri);
 

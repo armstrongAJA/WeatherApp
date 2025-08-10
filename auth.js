@@ -44,7 +44,7 @@ export async function initAuth0() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     code: authCode,
-                    code_verifier: storedVerifier,
+                    verifier: storedVerifier,
                     redirect_uri: redirectUri
                 })
             });

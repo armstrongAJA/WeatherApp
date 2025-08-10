@@ -21,6 +21,7 @@ app.post('/weather', async (req, res) => {
   }
 
   try {
+    console.log("AUTH0_DOMAIN:", process.env.AUTH0_DOMAIN);
     const tokenResponse = await axios.post(
       `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
       new URLSearchParams({

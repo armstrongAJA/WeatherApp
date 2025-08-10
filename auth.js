@@ -39,7 +39,7 @@ export async function initAuth0() {
         console.log("PKCE verifier:", storedVerifier);
 
         try {
-            await fetch("/exchange-token", { // <-- your backend endpoint
+            await fetch("https://weatherapp-3o2e.onrender.com/weather", { // <-- your backend endpoint
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

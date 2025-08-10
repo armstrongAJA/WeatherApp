@@ -89,8 +89,8 @@ export async function login() {
     await auth0.loginWithRedirect({
         authorizationParams: {
             redirect_uri: redirectUri
-        },
-        appState: { targetUrl: window.location.pathname }
+        }
+        //appState: { targetUrl: window.location.pathname }
     });
 }
 

@@ -1,4 +1,6 @@
 // weather.js
+
+//do imports and set globals
 import { initAuth0, updateUI, login, logout, getAccessToken } from "./auth.js";
 
 let LOCATION = "Leeds";
@@ -12,6 +14,7 @@ const spinner = document.getElementById("spinner");
 const chart = document.getElementById("chart");
 const citySelect = document.getElementById("city-select");
 
+//function to format date properly
 function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, {
@@ -21,6 +24,7 @@ function formatDate(dateStr) {
     });
 }
 
+//function to get the lat and long variables from an api
 async function getLatLong(location) {
     const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
     try {
@@ -35,14 +39,17 @@ async function getLatLong(location) {
     }
 }
 
+//function to form the pictocode filenames
 function pictocodeToFilename(code) {
     return code.toString().padStart(2, "0") + "_iday.svg";
 }
 
+//function to build the url to call the weather API from the backend 
 function buildApiUrl() {
     return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
 }
 
+//function to get data from the back end by passing token
 async function fetchWeatherData(token) {
     try {
         const res = await fetch(API_URL, {
@@ -59,6 +66,7 @@ async function fetchWeatherData(token) {
     }
 }
 
+//function to add data to table
 function populateTable(data) {
     tableBody.innerHTML = "";
     const count = data.data_day.time.length;
@@ -94,6 +102,7 @@ function populateTable(data) {
     }
 }
 
+//function to form the chart url for quickchart.io - replace this with react code later in development?
 function createChartUrl(data) {
     const labels = data.data_day.time.map((d) =>
         new Date(d).toLocaleDateString(undefined, { weekday: "short" })
@@ -124,6 +133,7 @@ function createChartUrl(data) {
     return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
 }
 
+//function to get the pictocode map from meteoblue
 async function loadWeatherCodeMap() {
     try {
         const res = await fetch("https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic", {
@@ -143,6 +153,7 @@ async function loadWeatherCodeMap() {
     }
 }
 
+//function fetch data from backend using token and call other functions to display the data
 async function initWeather(token) {
     spinner.style.display = "block";
     chart.style.display = "none";
@@ -174,6 +185,7 @@ async function initWeather(token) {
     document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
 }
 
+//add event listeners
 citySelect.addEventListener("change", async () => {
     LOCATION = citySelect.value;
     const token = getAccessToken();

@@ -10,7 +10,7 @@ export async function initAuth0() {
             const code = params.get("code");
             const verifier = localStorage.getItem("pkce_verifier");
 
-            const res = await fetch("/callback", {
+            const res = await fetch("https://weatherapp-3o2e.onrender.com/weather", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code, verifier }),

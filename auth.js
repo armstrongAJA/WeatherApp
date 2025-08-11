@@ -52,7 +52,7 @@ export async function login() {
         `client_id=${AUTH0_CLIENT_ID}&` +
         `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
         `scope=openid profile email&` +
-        `audience=${encodeURIComponent(audience)}&` +
+        `audience=${encodeURIComponent(AUDIENCE)}&` +
         `code_challenge=${challenge}&` +
         `code_challenge_method=S256`;
 

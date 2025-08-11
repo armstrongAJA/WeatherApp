@@ -10,17 +10,15 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Middleware to validate JWT access tokens from Auth0
+// Set up checkJwt with relevant parameters to validate token correctly later
 const checkJwt = auth({
-  audience: 'https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/',  // your Auth0 API audience
+  audience: 'https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/',
   issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
   tokenSigningAlg: 'RS256',
 });
 
-/**
- * POST /weather
- * Step 1: Exchange Auth0 authorization code for tokens
- */
+//Create POST method to pass code and verifier to the backend and initiate token exchange
+//Then send token back to frontend
 app.post('/weather', async (req, res) => {
   const { code, verifier } = req.body;
 
@@ -42,7 +40,6 @@ app.post('/weather', async (req, res) => {
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
 
-    // Send token info to frontend
     res.json(tokenResponse.data);
 
   } catch (err) {
@@ -51,10 +48,10 @@ app.post('/weather', async (req, res) => {
   }
 });
 
-/**
- * GET /weather
- * Step 2: Require valid token, then fetch from Meteoblue
- */
+//Add GET method to call weather API, passing relevant parameters
+//Require token from frontend to successfully call the API
+//Validate the token in the header with checkJwt
+
 app.get('/weather', checkJwt, async (req, res) => {
   const { lat, lon, LOCATION } = req.query;
   const apiKey = process.env.METEOBLUEAPIKEY;
@@ -73,6 +70,7 @@ app.get('/weather', checkJwt, async (req, res) => {
   }
 });
 
+//Write port to console log when running (debugging)
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -7,7 +7,8 @@ const { auth } = require('express-oauth2-jwt-bearer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+//Add frontend origin to cors to ensure only requests from frontend can be sent to the backend, no other origins.
+app.use(cors({ origin: 'https://armstrongaja.github.io' }));
 app.use(express.json());
 
 // Set up checkJwt with relevant parameters to validate token correctly later

@@ -63,7 +63,7 @@ export function logout() {
     localStorage.removeItem("pkce_verifier");
     isAuthenticated = false;
     accessToken = null;
-    window.location.href = "/";
+    window.location.href = "/WeatherApp/about.html";
 }
 
 export function getAccessToken() {

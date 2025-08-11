@@ -2,14 +2,17 @@
 let accessToken = null;
 let isAuthenticated = false;
 
+//function to get code from Auth0, then get and check token in backend
 export async function initAuth0() {
-    // Check if returning from Auth0 with ?code=...
+    
+    // Check if returning from Auth0 with a code, then get the code from url params, and verifier from local storage
     const params = new URLSearchParams(window.location.search);
     if (params.has("code")) {
         try {
             const code = params.get("code");
             const verifier = localStorage.getItem("pkce_verifier");
-
+            
+    // POST parameters to the backend endpoint
             const res = await fetch("https://weatherapp-3o2e.onrender.com/weather", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -17,21 +20,22 @@ export async function initAuth0() {
             });
 
             if (!res.ok) throw new Error("Token exchange failed");
-
+            
+    // Get a token back in the response and set isAuthenticated to true
             const data = await res.json();
             accessToken = data.access_token;
             isAuthenticated = true;
 
-            // Save token in memory (or localStorage if you want persistence)
+    // Save token in localStorage
             localStorage.setItem("access_token", accessToken);
 
-            // Remove ?code=... from URL
+    // Remove parameters from URL
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
             console.error("Error during token exchange:", err);
         }
     } else {
-        // Check if already logged in from before
+    // Check for token and update isAuthenticated parameter accordingly
         const storedToken = localStorage.getItem("access_token");
         if (storedToken) {
             accessToken = storedToken;
@@ -42,6 +46,7 @@ export async function initAuth0() {
     return isAuthenticated;
 }
 
+//create a function to login by generating PKCE verifier, then generate code challenge and URL, then redirect to log in
 export async function login() {
     const verifier = generateCodeVerifier();
     localStorage.setItem("pkce_verifier", verifier);
@@ -59,26 +64,29 @@ export async function login() {
     window.location.href = authUrl;
 }
 
+//function to log out by deleting auth parameters, then redirecting to AUTH0 logout endpoint
 export function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("pkce_verifier");
     isAuthenticated = false;
     accessToken = null;
 
-    // Redirect to Auth0 logout endpoint
+// Redirect to Auth0 logout endpoint
     window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?client_id=${AUTH0_CLIENT_ID}&returnTo=${RETURN_TO}`;
 }
 
+//Simple function to call to get the access token
 export function getAccessToken() {
     return accessToken;
 }
 
+// function to display the login and logout buttons based on if authenticated or not
 export async function updateUI() {
     document.getElementById("login-btn").style.display = isAuthenticated ? "none" : "inline-block";
     document.getElementById("logout-btn").style.display = isAuthenticated ? "inline-block" : "none";
 }
 
-// --- PKCE helpers ---
+// helper functions for generating code challenge
 function generateCodeVerifier() {
     const array = new Uint32Array(56);
     window.crypto.getRandomValues(array);
@@ -95,7 +103,7 @@ async function generateCodeChallenge(verifier) {
         .replace(/=+$/, "");
 }
 
-// --- Config ---
+// Add all the hard coded parameters here for the AUTH0 login to use when the functions are called
 const AUTH0_DOMAIN = "dev-48b12ypfjnzz7foo.us.auth0.com";
 const AUTH0_CLIENT_ID = "noq30FodeeaQqjfpwSCXEV1uXWqs42rG";
 const REDIRECT_URI = "https://armstrongaja.github.io/WeatherApp/about.html";

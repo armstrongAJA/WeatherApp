@@ -2,12 +2,20 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config(); // load .env variables
+const { auth } = require('express-oauth2-jwt-bearer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Middleware to validate JWT access tokens from Auth0
+const checkJwt = auth({
+  audience: 'https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/',  // your Auth0 API audience
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+  tokenSigningAlg: 'RS256',
+});
 
 /**
  * POST /weather
@@ -21,8 +29,6 @@ app.post('/weather', async (req, res) => {
   }
 
   try {
-    console.log("AUTH0_DOMAIN:", process.env.AUTH0_DOMAIN);
-    console.log("Verifier:", verifier);
     const tokenResponse = await axios.post(
       `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
       new URLSearchParams({
@@ -49,21 +55,9 @@ app.post('/weather', async (req, res) => {
  * GET /weather
  * Step 2: Require valid token, then fetch from Meteoblue
  */
-app.get('/weather', async (req, res) => {
+app.get('/weather', checkJwt, async (req, res) => {
   const { lat, lon, LOCATION } = req.query;
-  const authHeader = req.headers.authorization;
   const apiKey = process.env.METEOBLUEAPIKEY;
-
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Missing Authorization header' });
-  }
-
-  // Optionally verify JWT here
-  // For now, just check it exists
-  const token = authHeader.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ error: 'Invalid Authorization header' });
-  }
 
   if (!lat || !lon) {
     return res.status(400).json({ error: 'Missing lat, lon or LOCATION parameter' });

@@ -64,7 +64,9 @@ export function logout() {
     localStorage.removeItem("pkce_verifier");
     isAuthenticated = false;
     accessToken = null;
-    window.location.href = "/WeatherApp/about.html";
+
+    // Redirect to Auth0 logout endpoint
+    window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?client_id=${AUTH0_CLIENT_ID}&returnTo=${RETURN_TO}`;
 }
 
 export function getAccessToken() {
@@ -98,3 +100,4 @@ const AUTH0_DOMAIN = "dev-48b12ypfjnzz7foo.us.auth0.com";
 const AUTH0_CLIENT_ID = "noq30FodeeaQqjfpwSCXEV1uXWqs42rG";
 const REDIRECT_URI = "https://armstrongaja.github.io/WeatherApp/about.html";
 const AUDIENCE = "https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/";
+const RETURN_TO = "https://armstrongaja.github.io/WeatherApp/about.html";

@@ -52,6 +52,7 @@ export async function login() {
         `client_id=${AUTH0_CLIENT_ID}&` +
         `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
         `scope=openid profile email&` +
+        `audience=${encodeURIComponent(audience)}&` +
         `code_challenge=${challenge}&` +
         `code_challenge_method=S256`;
 
@@ -96,3 +97,4 @@ async function generateCodeChallenge(verifier) {
 const AUTH0_DOMAIN = "dev-48b12ypfjnzz7foo.us.auth0.com";
 const AUTH0_CLIENT_ID = "noq30FodeeaQqjfpwSCXEV1uXWqs42rG";
 const REDIRECT_URI = "https://armstrongaja.github.io/WeatherApp/about.html";
+const AUDIENCE = "https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/";

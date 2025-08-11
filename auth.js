@@ -1,139 +1,117 @@
-// auth.js — PKCE handled manually, keeps getAuth0Client() for weatherPage.js compatibility
+// auth.js
+let accessToken = null;
+let codeVerifier = null;
+let auth0Client = null; // placeholder for compatibility
 
-let auth0 = null; // not actually using Auth0 SPA client for token exchange, just for UI/user info
-let pkceVerifier = null;
+const backendUrl = "https://weatherapp-3o2e.onrender.com"; // your backend
 
-const AUTH0_DOMAIN = "dev-48b12ypfjnzz7foo.us.auth0.com";
-const CLIENT_ID = "noq30FodeeaQqjfpwSCXEV1uXWqs42rG";
-const AUDIENCE = `https://${AUTH0_DOMAIN}/api/v2/`;
-
-// -------------------------
-// INIT (runs on page load)
-// -------------------------
-export async function initAuth0() {
-    const redirectUri = window.location.origin + window.location.pathname;
-
-    // Check for auth code from Auth0
-    const query = new URLSearchParams(window.location.search);
-    if (query.has("code")) {
-        const code = query.get("code");
-        const storedVerifier = sessionStorage.getItem("pkce_verifier");
-
-        console.log("Auth code:", code);
-        console.log("Using stored PKCE verifier:", storedVerifier);
-
-        // Send code & verifier to backend for token exchange
-        try {
-            const res = await fetch("https://weatherapp-3o2e.onrender.com/weather", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    code,
-                    verifier: storedVerifier,
-                    redirect_uri: redirectUri
-                })
-            });
-
-            if (!res.ok) throw new Error(`Backend error: ${res.status}`);
-            const tokenData = await res.json();
-            console.log("Token data from backend:", tokenData);
-        } catch (err) {
-            console.error("Error sending code to backend:", err);
-        }
-
-        // Clean up URL
-        window.history.replaceState({}, document.title, redirectUri);
-    }
-
-    return await updateUI();
-}
-
-// -------------------------
-// LOGIN
-// -------------------------
-export async function login() {
-    const redirectUri = window.location.origin + window.location.pathname;
-
-    // Generate PKCE values
-    pkceVerifier = generateRandomString(64);
-    const challenge = await pkceChallengeFromVerifier(pkceVerifier);
-
-    // Store verifier for backend token exchange
-    sessionStorage.setItem("pkce_verifier", pkceVerifier);
-
-    // Redirect to Auth0 authorize endpoint (no SPA SDK)
-    const authorizeUrl = new URL(`https://${AUTH0_DOMAIN}/authorize`);
-    authorizeUrl.search = new URLSearchParams({
-        response_type: "code",
-        client_id: CLIENT_ID,
-        redirect_uri: redirectUri,
-        audience: AUDIENCE,
-        code_challenge: challenge,
-        code_challenge_method: "S256",
-        scope: "openid profile email"
-    });
-
-    window.location = authorizeUrl.toString();
-}
-
-// -------------------------
-// LOGOUT
-// -------------------------
-export function logout() {
-    const logoutUrl = new URL(`https://${AUTH0_DOMAIN}/v2/logout`);
-    logoutUrl.search = new URLSearchParams({
-        client_id: CLIENT_ID,
-        returnTo: window.location.origin + window.location.pathname
-    });
-    window.location = logoutUrl.toString();
-}
-
-// -------------------------
-// DUMMY getAuth0Client (so weatherPage.js works)
-// -------------------------
-export function getAuth0Client() {
-    return auth0; // We’re not using SPA client here, but keeping the function for compatibility
-}
-
-// -------------------------
-// UI UPDATE (minimal demo)
-// -------------------------
-export async function updateUI() {
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-
-    // If we had a token in storage, we'd mark as authenticated
-    const hasToken = !!sessionStorage.getItem("pkce_verifier"); // naive check for demo
-    if (hasToken) {
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-    } else {
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-    }
-
-    return hasToken;
-}
-
-// -------------------------
-// PKCE Helpers
-// -------------------------
 function generateRandomString(length) {
-    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-    let result = "";
-    const values = crypto.getRandomValues(new Uint8Array(length));
-    for (let i = 0; i < length; i++) {
-        result += charset[values[i] % charset.length];
-    }
-    return result;
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  let result = "";
+  const randomValues = crypto.getRandomValues(new Uint8Array(length));
+  randomValues.forEach((v) => (result += charset[v % charset.length]));
+  return result;
 }
 
-async function pkceChallengeFromVerifier(verifier) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(verifier);
-    const digest = await crypto.subtle.digest("SHA-256", data);
-    return btoa(String.fromCharCode(...new Uint8Array(digest)))
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+async function sha256(plain) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return new Uint8Array(hash);
+}
+
+function base64urlencode(bytes) {
+  return btoa(String.fromCharCode.apply(null, [...bytes]))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+export async function initAuth0() {
+  const params = new URLSearchParams(window.location.search);
+
+  // Step 1 — If redirected back with code, exchange with backend
+  if (params.has("code") && params.has("state")) {
+    const storedState = sessionStorage.getItem("pkce_state");
+    if (params.get("state") !== storedState) {
+      console.error("State mismatch — possible CSRF");
+      return false;
+    }
+
+    codeVerifier = sessionStorage.getItem("pkce_code_verifier");
+
+    const code = params.get("code");
+
+    try {
+      const tokenRes = await fetch(`${backendUrl}/exchange-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          code_verifier: codeVerifier,
+          redirect_uri: window.location.origin + window.location.pathname,
+        }),
+      });
+
+      if (!tokenRes.ok) throw new Error(`HTTP ${tokenRes.status}`);
+      const data = await tokenRes.json();
+      accessToken = data.access_token;
+
+      // Clean up query params
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return true;
+    } catch (err) {
+      console.error("Token exchange failed:", err);
+      return false;
+    }
+  }
+
+  return false; // not authenticated yet
+}
+
+export function getAuth0Client() {
+  // Kept for compatibility with weather.js — returns a fake object
+  return {
+    getToken: () => accessToken,
+  };
+}
+
+export async function login() {
+  codeVerifier = generateRandomString(64);
+  const codeChallenge = base64urlencode(await sha256(codeVerifier));
+
+  const state = generateRandomString(16);
+
+  sessionStorage.setItem("pkce_code_verifier", codeVerifier);
+  sessionStorage.setItem("pkce_state", state);
+
+  const authUrl = `https://dev-48b12ypfjnzz7foo.us.auth0.com/authorize?` +
+    `response_type=code&` +
+    `client_id=${encodeURIComponent("YOUR_CLIENT_ID")}&` +
+    `redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&` +
+    `scope=openid profile email&` +
+    `state=${encodeURIComponent(state)}&` +
+    `code_challenge=${encodeURIComponent(codeChallenge)}&` +
+    `code_challenge_method=S256`;
+
+  window.location = authUrl;
+}
+
+export function logout() {
+  accessToken = null;
+  window.location.href = `https://dev-48b12ypfjnzz7foo.us.auth0.com/v2/logout?client_id=YOUR_CLIENT_ID&returnTo=${encodeURIComponent(window.location.origin)}`;
+}
+
+export async function updateUI() {
+  const loginBtn = document.getElementById("login-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  if (accessToken) {
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+  } else {
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+  }
 }

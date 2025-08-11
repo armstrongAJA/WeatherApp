@@ -1,5 +1,5 @@
 // weather.js
-import { initAuth0, updateUI, getAuth0Client, login, logout } from "./auth.js";
+import { initAuth0, updateUI, login, logout, getAccessToken } from "./auth.js";
 
 let LOCATION = "Leeds";
 let LAT = null;
@@ -13,184 +13,190 @@ const chart = document.getElementById("chart");
 const citySelect = document.getElementById("city-select");
 
 function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+    });
 }
 
 async function getLatLong(location) {
-  const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
-  try {
-    const res = await fetch(geocodeUrl);
-    const result = await res.json();
-    if (!result[0]) throw new Error(`No results for ${location}`);
-    return [parseFloat(result[0].lat), parseFloat(result[0].lon)];
-  } catch (err) {
-    console.error("Geocoding error:", err);
-    return [null, null];
-  }
+    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+    try {
+        const res = await fetch(geocodeUrl);
+        const result = await res.json();
+        if (!result[0]) throw new Error(`No results for ${location}`);
+        const { lat, lon } = result[0];
+        return [parseFloat(lat), parseFloat(lon)];
+    } catch (err) {
+        console.error("Geocoding error:", err);
+        return [null, null];
+    }
 }
 
 function pictocodeToFilename(code) {
-  return code.toString().padStart(2, "0") + "_iday.svg";
+    return code.toString().padStart(2, "0") + "_iday.svg";
 }
 
 function buildApiUrl() {
-  return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
+    return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
 }
 
 async function fetchWeatherData(token) {
-  try {
-    const res = await fetch(API_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.error("Error fetching weather data:", err);
-    alert("Failed to load weather data.");
-    return null;
-  }
+    try {
+        const res = await fetch(API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Error fetching weather data:", err);
+        alert("Failed to load weather data.");
+        return null;
+    }
 }
 
 function populateTable(data) {
-  tableBody.innerHTML = "";
-  const count = data.data_day.time.length;
+    tableBody.innerHTML = "";
+    const count = data.data_day.time.length;
 
-  for (let i = 0; i < count; i++) {
-    const tr = document.createElement("tr");
+    for (let i = 0; i < count; i++) {
+        const tr = document.createElement("tr");
 
-    const tdDate = document.createElement("td");
-    tdDate.textContent = formatDate(data.data_day.time[i]);
-    tr.appendChild(tdDate);
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formatDate(data.data_day.time[i]);
+        tr.appendChild(tdDate);
 
-    const tdTemp = document.createElement("td");
-    tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
-    tr.appendChild(tdTemp);
+        const tdTemp = document.createElement("td");
+        tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
+        tr.appendChild(tdTemp);
 
-    const tdWeather = document.createElement("td");
-    const code = data.data_day.pictocode[i];
-    const weatherInfo = weatherCodeMap[code]?.text || "Unknown";
+        const tdWeather = document.createElement("td");
+        const code = data.data_day.pictocode[i];
+        const weatherInfo = weatherCodeMap[code]?.text || "Unknown";
 
-    const iconImg = document.createElement("img");
-    iconImg.src = `./${pictocodeToFilename(code)}`;
-    iconImg.alt = weatherInfo;
-    iconImg.style.width = "50px";
-    iconImg.style.height = "50px";
-    iconImg.style.display = "block";
-    iconImg.style.margin = "0 auto 5px";
+        const iconImg = document.createElement("img");
+        iconImg.src = `./${pictocodeToFilename(code)}`;
+        iconImg.alt = weatherInfo;
+        iconImg.style.width = "50px";
+        iconImg.style.height = "50px";
+        iconImg.style.display = "block";
+        iconImg.style.margin = "0 auto 5px";
 
-    tdWeather.appendChild(iconImg);
-    tdWeather.appendChild(document.createTextNode(weatherInfo));
-    tr.appendChild(tdWeather);
+        tdWeather.appendChild(iconImg);
+        tdWeather.appendChild(document.createTextNode(weatherInfo));
+        tr.appendChild(tdWeather);
 
-    tableBody.appendChild(tr);
-  }
+        tableBody.appendChild(tr);
+    }
 }
 
 function createChartUrl(data) {
-  const labels = data.data_day.time.map((d) =>
-    new Date(d).toLocaleDateString(undefined, { weekday: "short" })
-  );
-  const temps = data.data_day.temperature_max;
+    const labels = data.data_day.time.map((d) =>
+        new Date(d).toLocaleDateString(undefined, { weekday: "short" })
+    );
+    const temps = data.data_day.temperature_max;
 
-  const chartConfig = {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Max Temp (°C)",
-          data: temps,
-          backgroundColor: "rgba(0, 123, 255, 0.7)",
-          borderColor: "rgba(0, 123, 255, 1)",
-          borderWidth: 1,
+    const chartConfig = {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Max Temp (°C)",
+                    data: temps,
+                    backgroundColor: "rgba(0, 123, 255, 0.7)",
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    borderWidth: 1,
+                },
+            ],
         },
-      ],
-    },
-    options: { scales: { y: { beginAtZero: false } } },
-  };
+        options: {
+            scales: {
+                y: { beginAtZero: false },
+            },
+        },
+    };
 
-  return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
+    return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
 }
 
 async function loadWeatherCodeMap() {
-  try {
-    const res = await fetch(
-      "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic",
-      { headers: { Accept: "application/json" } }
-    );
-    if (!res.ok) throw new Error("Failed to load pictogram data");
-    const pictogramData = await res.json();
-    const map = {};
-    pictogramData.daily.forEach((entry) => {
-      map[entry.pictocode] = { text: entry.description };
-    });
-    return map;
-  } catch (error) {
-    console.error("Error loading pictocode map:", error);
-    return {};
-  }
+    try {
+        const res = await fetch("https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic", {
+            headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed to load pictogram data");
+
+        const pictogramData = await res.json();
+        const map = {};
+        pictogramData.daily.forEach((entry) => {
+            map[entry.pictocode] = { text: entry.description };
+        });
+        return map;
+    } catch (error) {
+        console.error("Error loading pictocode map:", error);
+        return {};
+    }
 }
 
 async function initWeather(token) {
-  spinner.style.display = "block";
-  chart.style.display = "none";
+    spinner.style.display = "block";
+    chart.style.display = "none";
 
-  weatherCodeMap = await loadWeatherCodeMap();
+    weatherCodeMap = await loadWeatherCodeMap();
 
-  const [lat, lon] = await getLatLong(LOCATION);
-  if (!lat || !lon) {
-    alert("Failed to get location coordinates.");
+    const [lat, lon] = await getLatLong(LOCATION);
+    if (!lat || !lon) {
+        alert("Failed to get location coordinates.");
+        spinner.style.display = "none";
+        return;
+    }
+
+    LAT = lat;
+    LON = lon;
+    API_URL = buildApiUrl();
+
+    const data = await fetchWeatherData(token);
+
+    if (data) {
+        populateTable(data);
+        chart.src = createChartUrl(data);
+        chart.style.display = "block";
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
+    }
+
     spinner.style.display = "none";
-    return;
-  }
-
-  LAT = lat;
-  LON = lon;
-  API_URL = buildApiUrl();
-
-  const data = await fetchWeatherData(token);
-
-  if (data) {
-    populateTable(data);
-    chart.src = createChartUrl(data);
-    chart.style.display = "block";
-  } else {
-    tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
-  }
-
-  spinner.style.display = "none";
-  document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
+    document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
 }
 
-// Event listeners
 citySelect.addEventListener("change", async () => {
-  LOCATION = citySelect.value;
-  const token = getAuth0Client().getToken();
-  await initWeather(token);
+    LOCATION = citySelect.value;
+    const token = getAccessToken();
+    if (token) {
+        await initWeather(token);
+    }
 });
 
 document.getElementById("back-btn").addEventListener("click", () => {
-  document.getElementById("modal").style.display = "flex";
+    document.getElementById("modal").style.display = "flex";
 });
 
 document.getElementById("ok-btn").addEventListener("click", () => {
-  window.location.href = "index.html";
+    window.location.href = "index.html";
 });
 
 window.addEventListener("click", (event) => {
-  if (event.target === document.getElementById("modal")) {
-    document.getElementById("modal").style.display = "none";
-  }
+    if (event.target === document.getElementById("modal")) {
+        document.getElementById("modal").style.display = "none";
+    }
 });
 
-// On load
 window.addEventListener("load", async () => {
-  try {
     const isAuthenticated = await initAuth0();
 
     document.getElementById("login-btn").addEventListener("click", login);
@@ -199,10 +205,9 @@ window.addEventListener("load", async () => {
     await updateUI();
 
     if (isAuthenticated) {
-      const token = getAuth0Client().getToken();
-      await initWeather(token);
+        const token = getAccessToken();
+        if (token) {
+            await initWeather(token);
+        }
     }
-  } catch (err) {
-    console.error("Error initializing app:", err);
-  }
 });

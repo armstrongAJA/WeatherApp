@@ -1,47 +1,26 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-require('dotenv').config();
-const { createClient } = require('redis');
-const session = require('express-session');
-const RedisStore = require('connect-redis').default;
+require('dotenv').config(); // load .env variables
+const { auth } = require('express-oauth2-jwt-bearer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-<<<<<<< HEAD
-// ---- 1. Connect to Redis ----
-const redisClient = createClient({
-  url: process.env.REDIS_URL, // e.g. redis://default:<password>@<host>:<port>
-  legacyMode: true, // needed for connect-redis
-});
-redisClient.connect().catch(console.error);
-
-// ---- 2. Configure session store ----
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'supersecret', // use a strong secret in .env
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', // only send over HTTPS in prod
-      httpOnly: true, // prevent JS access to cookies
-      sameSite: 'lax', // helps protect against CSRF
-      maxAge: 60 * 60 * 1000, // 1 hour
-    },
-  })
-);
-
-// ---- 3. CORS ----
-app.use(cors({ origin: 'https://armstrongaja.github.io', credentials: true }));
-=======
-app.use(cors());
->>>>>>> parent of 0844453 (Update backend.js)
+//Add frontend origin to cors to ensure only requests from frontend can be sent to the backend, no other origins.
+app.use(cors({ origin: 'https://armstrongaja.github.io' }));
 app.use(express.json());
 
-// ---- 4. Auth0 token exchange (PKCE) ----
-app.post('/auth/callback', async (req, res) => {
+// Set up checkJwt with relevant parameters to validate token correctly later
+const checkJwt = auth({
+  audience: 'https://dev-48b12ypfjnzz7foo.us.auth0.com/api/v2/',
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+  tokenSigningAlg: 'RS256',
+});
+
+//Create POST method to pass code and verifier to the backend and initiate token exchange
+//Then send token back to frontend
+app.post('/weather', async (req, res) => {
   const { code, verifier } = req.body;
 
   if (!code || !verifier) {
@@ -49,38 +28,34 @@ app.post('/auth/callback', async (req, res) => {
   }
 
   try {
-    // Exchange code + verifier for access token
     const tokenResponse = await axios.post(
       `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
       new URLSearchParams({
         grant_type: 'authorization_code',
         client_id: process.env.AUTH0_CLIENT_ID,
-        client_secret: process.env.AUTH0_CLIENT_SECRET,
+        client_secret: process.env.AUTH0_CLIENT_SECRET, // only safe on backend
         code,
         code_verifier: verifier,
-        redirect_uri: 'https://armstrongaja.github.io/WeatherApp/about.html',
+        redirect_uri: 'https://armstrongaja.github.io/WeatherApp/about.html'
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
 
-    // Store token in the server session (never send to frontend)
-    req.session.accessToken = tokenResponse.data.access_token;
+    res.json(tokenResponse.data);
 
-    res.json({ success: true });
   } catch (err) {
-    console.error('Token exchange failed:', err.response?.data || err.message);
+    console.error('Error exchanging code for token:', err.response?.data || err.message);
     res.status(500).json({ error: 'Token exchange failed' });
   }
 });
 
-// ---- 5. Weather API route (backend uses token) ----
-app.get('/weather', async (req, res) => {
+//Add GET method to call weather API, passing relevant parameters
+//Require token from frontend to successfully call the API
+//Validate the token in the header with checkJwt
+
+app.get('/weather', checkJwt, async (req, res) => {
   const { lat, lon, LOCATION } = req.query;
   const apiKey = process.env.METEOBLUEAPIKEY;
-
-  if (!req.session.accessToken) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
 
   if (!lat || !lon) {
     return res.status(400).json({ error: 'Missing lat, lon or LOCATION parameter' });
@@ -88,27 +63,15 @@ app.get('/weather', async (req, res) => {
 
   try {
     const url = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${lat}&lon=${lon}&name=${LOCATION}&format=json&apikey=${apiKey}&asl=35&tz=Europe/London`;
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${req.session.accessToken}`,
-      },
-    });
-
+    const response = await axios.get(url);
     res.json(response.data);
   } catch (err) {
-    console.error('Error fetching weather:', err.message);
+    console.error('Error fetching from Meteoblue:', err.message);
     res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 });
 
-// ---- 6. Logout ----
-app.post('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.clearCookie('connect.sid');
-    res.json({ success: true });
-  });
-});
-
+//Write port to console log when running (debugging)
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -9,6 +9,7 @@ const RedisStore = require('connect-redis').default;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+<<<<<<< HEAD
 // ---- 1. Connect to Redis ----
 const redisClient = createClient({
   url: process.env.REDIS_URL, // e.g. redis://default:<password>@<host>:<port>
@@ -34,6 +35,9 @@ app.use(
 
 // ---- 3. CORS ----
 app.use(cors({ origin: 'https://armstrongaja.github.io', credentials: true }));
+=======
+app.use(cors());
+>>>>>>> parent of 0844453 (Update backend.js)
 app.use(express.json());
 
 // ---- 4. Auth0 token exchange (PKCE) ----

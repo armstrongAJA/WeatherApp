@@ -1,7 +1,7 @@
 // WeatherApp.jsx
 import React, { useState, useEffect } from "react";
 import { initAuth0, updateUI, login, logout, getAccessToken } from "./auth"; // Same as your original auth.js
-
+import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 function WeatherApp() {
   const [location, setLocation] = useState("Leeds");
   const [lat, setLat] = useState(null);
@@ -12,17 +12,17 @@ function WeatherApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Utility: format date
-  const formatDate = (dateStr) => {
+  const formatDate = dateStr => {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, {
       weekday: "short",
       month: "short",
-      day: "numeric",
+      day: "numeric"
     });
   };
 
   // Fetch lat/lon from Nominatim API
-  const getLatLong = async (loc) => {
+  const getLatLong = async loc => {
     const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${loc}&country=united%20kingdom&format=json`;
     try {
       const res = await fetch(geocodeUrl);
@@ -36,18 +36,18 @@ function WeatherApp() {
   };
 
   // Pictocode to filename
-  const pictocodeToFilename = (code) =>
-    code.toString().padStart(2, "0") + "_iday.svg";
+  const pictocodeToFilename = code => code.toString().padStart(2, "0") + "_iday.svg";
 
   // Build backend API URL
-  const buildApiUrl = () =>
-    `https://weatherapp-3o2e.onrender.com/weather?lat=${lat}&lon=${lon}&LOCATION=${location}`;
+  const buildApiUrl = () => `https://weatherapp-3o2e.onrender.com/weather?lat=${lat}&lon=${lon}&LOCATION=${location}`;
 
   // Fetch weather data from backend
-  const fetchWeatherData = async (token) => {
+  const fetchWeatherData = async token => {
     try {
       const res = await fetch(buildApiUrl(), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       return await res.json();
@@ -61,15 +61,18 @@ function WeatherApp() {
   // Fetch pictocode map
   const loadWeatherCodeMap = async () => {
     try {
-      const res = await fetch(
-        "https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic",
-        { headers: { Accept: "application/json" } }
-      );
+      const res = await fetch("https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic", {
+        headers: {
+          Accept: "application/json"
+        }
+      });
       if (!res.ok) throw new Error("Failed to load pictogram data");
       const pictogramData = await res.json();
       const map = {};
-      pictogramData.daily.forEach((entry) => {
-        map[entry.pictocode] = { text: entry.description };
+      pictogramData.daily.forEach(entry => {
+        map[entry.pictocode] = {
+          text: entry.description
+        };
       });
       return map;
     } catch (error) {
@@ -79,39 +82,39 @@ function WeatherApp() {
   };
 
   // Chart URL generator
-  const createChartUrl = (data) => {
-    const labels = data.data_day.time.map((d) =>
-      new Date(d).toLocaleDateString(undefined, { weekday: "short" })
-    );
+  const createChartUrl = data => {
+    const labels = data.data_day.time.map(d => new Date(d).toLocaleDateString(undefined, {
+      weekday: "short"
+    }));
     const temps = data.data_day.temperature_max;
-
     const chartConfig = {
       type: "bar",
       data: {
         labels,
-        datasets: [
-          {
-            label: "Max Temp (°C)",
-            data: temps,
-            backgroundColor: "rgba(0, 123, 255, 0.7)",
-            borderColor: "rgba(0, 123, 255, 1)",
-            borderWidth: 1,
-          },
-        ],
+        datasets: [{
+          label: "Max Temp (°C)",
+          data: temps,
+          backgroundColor: "rgba(0, 123, 255, 0.7)",
+          borderColor: "rgba(0, 123, 255, 1)",
+          borderWidth: 1
+        }]
       },
-      options: { scales: { y: { beginAtZero: false } } },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
     };
-
     return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
   };
 
   // Main initializer
-  const initWeather = async (token) => {
+  const initWeather = async token => {
     setLoading(true);
-
     const map = await loadWeatherCodeMap();
     setWeatherCodeMap(map);
-
     const [latitude, longitude] = await getLatLong(location);
     if (!latitude || !longitude) {
       alert("Failed to get location coordinates.");
@@ -120,10 +123,8 @@ function WeatherApp() {
     }
     setLat(latitude);
     setLon(longitude);
-
     const data = await fetchWeatherData(token);
     setWeatherData(data);
-
     setLoading(false);
   };
 
@@ -147,60 +148,75 @@ function WeatherApp() {
       if (token) initWeather(token);
     }
   }, [location]);
-
-  return (
-    <div className="weather-app">
-      <header>
-        <h1>7-Day Weather Forecast ({location})</h1>
-        <button onClick={login}>Login</button>
-        <button onClick={logout}>Logout</button>
-        <select value={location} onChange={(e) => setLocation(e.target.value)}>
-          <option value="Leeds">Leeds</option>
-          <option value="London">London</option>
-          <option value="Manchester">Manchester</option>
-        </select>
-      </header>
-
-      {loading && <p>Loading...</p>}
-
-      {!loading && weatherData && (
-        <>
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Max Temp (°C)</th>
-                <th>Weather</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weatherData.data_day.time.map((time, i) => {
-                const code = weatherData.data_day.pictocode[i];
-                const weatherInfo = weatherCodeMap[code]?.text || "Unknown";
-                return (
-                  <tr key={i}>
-                    <td>{formatDate(time)}</td>
-                    <td>{weatherData.data_day.temperature_max[i].toFixed(1)}</td>
-                    <td>
-                      <img
-                        src={`./${pictocodeToFilename(code)}`}
-                        alt={weatherInfo}
-                        width={50}
-                        height={50}
-                        style={{ display: "block", margin: "0 auto 5px" }}
-                      />
-                      {weatherInfo}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <img src={createChartUrl(weatherData)} alt="Weather Chart" />
-        </>
-      )}
-    </div>
-  );
+  return /*#__PURE__*/_jsxs("div", {
+    className: "weather-app",
+    children: [/*#__PURE__*/_jsxs("header", {
+      children: [/*#__PURE__*/_jsxs("h1", {
+        children: ["7-Day Weather Forecast (", location, ")"]
+      }), /*#__PURE__*/_jsx("button", {
+        onClick: login,
+        children: "Login"
+      }), /*#__PURE__*/_jsx("button", {
+        onClick: logout,
+        children: "Logout"
+      }), /*#__PURE__*/_jsxs("select", {
+        value: location,
+        onChange: e => setLocation(e.target.value),
+        children: [/*#__PURE__*/_jsx("option", {
+          value: "Leeds",
+          children: "Leeds"
+        }), /*#__PURE__*/_jsx("option", {
+          value: "London",
+          children: "London"
+        }), /*#__PURE__*/_jsx("option", {
+          value: "Manchester",
+          children: "Manchester"
+        })]
+      })]
+    }), loading && /*#__PURE__*/_jsx("p", {
+      children: "Loading..."
+    }), !loading && weatherData && /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsxs("table", {
+        children: [/*#__PURE__*/_jsx("thead", {
+          children: /*#__PURE__*/_jsxs("tr", {
+            children: [/*#__PURE__*/_jsx("th", {
+              children: "Date"
+            }), /*#__PURE__*/_jsx("th", {
+              children: "Max Temp (\xB0C)"
+            }), /*#__PURE__*/_jsx("th", {
+              children: "Weather"
+            })]
+          })
+        }), /*#__PURE__*/_jsx("tbody", {
+          children: weatherData.data_day.time.map((time, i) => {
+            var _weatherCodeMap$code;
+            const code = weatherData.data_day.pictocode[i];
+            const weatherInfo = ((_weatherCodeMap$code = weatherCodeMap[code]) === null || _weatherCodeMap$code === void 0 ? void 0 : _weatherCodeMap$code.text) || "Unknown";
+            return /*#__PURE__*/_jsxs("tr", {
+              children: [/*#__PURE__*/_jsx("td", {
+                children: formatDate(time)
+              }), /*#__PURE__*/_jsx("td", {
+                children: weatherData.data_day.temperature_max[i].toFixed(1)
+              }), /*#__PURE__*/_jsxs("td", {
+                children: [/*#__PURE__*/_jsx("img", {
+                  src: `./${pictocodeToFilename(code)}`,
+                  alt: weatherInfo,
+                  width: 50,
+                  height: 50,
+                  style: {
+                    display: "block",
+                    margin: "0 auto 5px"
+                  }
+                }), weatherInfo]
+              })]
+            }, i);
+          })
+        })]
+      }), /*#__PURE__*/_jsx("img", {
+        src: createChartUrl(weatherData),
+        alt: "Weather Chart"
+      })]
+    })]
+  });
 }
-
 export default WeatherApp;

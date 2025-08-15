@@ -1,222 +1,225 @@
-// WeatherApp.jsx
-import React, { useState, useEffect } from "react";
-import { initAuth0, updateUI, login, logout, getAccessToken } from "./auth"; // Same as your original auth.js
-import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
-function WeatherApp() {
-  const [location, setLocation] = useState("Leeds");
-  const [lat, setLat] = useState(null);
-  const [lon, setLon] = useState(null);
-  const [weatherCodeMap, setWeatherCodeMap] = useState({});
-  const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+// weather.js
 
-  // Utility: format date
-  const formatDate = dateStr => {
+//do imports and set globals
+import { initAuth0, updateUI, login, logout, getAccessToken } from "./auth.js";
+
+let LOCATION = "Leeds";
+let LAT = null;
+let LON = null;
+let API_URL = "";
+let weatherCodeMap = {};
+
+const tableBody = document.getElementById("table-body");
+const spinner = document.getElementById("spinner");
+const chart = document.getElementById("chart");
+const citySelect = document.getElementById("city-select");
+
+//function to format date properly
+function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric"
+        weekday: "short",
+        month: "short",
+        day: "numeric",
     });
-  };
-
-  // Fetch lat/lon from Nominatim API
-  const getLatLong = async loc => {
-    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${loc}&country=united%20kingdom&format=json`;
-    try {
-      const res = await fetch(geocodeUrl);
-      const result = await res.json();
-      if (!result[0]) throw new Error(`No results for ${loc}`);
-      return [parseFloat(result[0].lat), parseFloat(result[0].lon)];
-    } catch (err) {
-      console.error("Geocoding error:", err);
-      return [null, null];
-    }
-  };
-
-  // Pictocode to filename
-  const pictocodeToFilename = code => code.toString().padStart(2, "0") + "_iday.svg";
-
-  // Build backend API URL
-  const buildApiUrl = () => `https://weatherapp-3o2e.onrender.com/weather?lat=${lat}&lon=${lon}&LOCATION=${location}`;
-
-  // Fetch weather data from backend
-  const fetchWeatherData = async token => {
-    try {
-      const res = await fetch(buildApiUrl(), {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
-    } catch (err) {
-      console.error("Error fetching weather data:", err);
-      alert("Failed to load weather data.");
-      return null;
-    }
-  };
-
-  // Fetch pictocode map
-  const loadWeatherCodeMap = async () => {
-    try {
-      const res = await fetch("https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic", {
-        headers: {
-          Accept: "application/json"
-        }
-      });
-      if (!res.ok) throw new Error("Failed to load pictogram data");
-      const pictogramData = await res.json();
-      const map = {};
-      pictogramData.daily.forEach(entry => {
-        map[entry.pictocode] = {
-          text: entry.description
-        };
-      });
-      return map;
-    } catch (error) {
-      console.error("Error loading pictocode map:", error);
-      return {};
-    }
-  };
-
-  // Chart URL generator
-  const createChartUrl = data => {
-    const labels = data.data_day.time.map(d => new Date(d).toLocaleDateString(undefined, {
-      weekday: "short"
-    }));
-    const temps = data.data_day.temperature_max;
-    const chartConfig = {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Max Temp (°C)",
-          data: temps,
-          backgroundColor: "rgba(0, 123, 255, 0.7)",
-          borderColor: "rgba(0, 123, 255, 1)",
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: false
-          }
-        }
-      }
-    };
-    return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
-  };
-
-  // Main initializer
-  const initWeather = async token => {
-    setLoading(true);
-    const map = await loadWeatherCodeMap();
-    setWeatherCodeMap(map);
-    const [latitude, longitude] = await getLatLong(location);
-    if (!latitude || !longitude) {
-      alert("Failed to get location coordinates.");
-      setLoading(false);
-      return;
-    }
-    setLat(latitude);
-    setLon(longitude);
-    const data = await fetchWeatherData(token);
-    setWeatherData(data);
-    setLoading(false);
-  };
-
-  // Auth + data load on mount
-  useEffect(() => {
-    (async () => {
-      const auth = await initAuth0();
-      setIsAuthenticated(auth);
-      await updateUI();
-      if (auth) {
-        const token = getAccessToken();
-        if (token) await initWeather(token);
-      }
-    })();
-  }, []);
-
-  // When location changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      const token = getAccessToken();
-      if (token) initWeather(token);
-    }
-  }, [location]);
-  return /*#__PURE__*/_jsxs("div", {
-    className: "weather-app",
-    children: [/*#__PURE__*/_jsxs("header", {
-      children: [/*#__PURE__*/_jsxs("h1", {
-        children: ["7-Day Weather Forecast (", location, ")"]
-      }), /*#__PURE__*/_jsx("button", {
-        onClick: login,
-        children: "Login"
-      }), /*#__PURE__*/_jsx("button", {
-        onClick: logout,
-        children: "Logout"
-      }), /*#__PURE__*/_jsxs("select", {
-        value: location,
-        onChange: e => setLocation(e.target.value),
-        children: [/*#__PURE__*/_jsx("option", {
-          value: "Leeds",
-          children: "Leeds"
-        }), /*#__PURE__*/_jsx("option", {
-          value: "London",
-          children: "London"
-        }), /*#__PURE__*/_jsx("option", {
-          value: "Manchester",
-          children: "Manchester"
-        })]
-      })]
-    }), loading && /*#__PURE__*/_jsx("p", {
-      children: "Loading..."
-    }), !loading && weatherData && /*#__PURE__*/_jsxs(_Fragment, {
-      children: [/*#__PURE__*/_jsxs("table", {
-        children: [/*#__PURE__*/_jsx("thead", {
-          children: /*#__PURE__*/_jsxs("tr", {
-            children: [/*#__PURE__*/_jsx("th", {
-              children: "Date"
-            }), /*#__PURE__*/_jsx("th", {
-              children: "Max Temp (\xB0C)"
-            }), /*#__PURE__*/_jsx("th", {
-              children: "Weather"
-            })]
-          })
-        }), /*#__PURE__*/_jsx("tbody", {
-          children: weatherData.data_day.time.map((time, i) => {
-            var _weatherCodeMap$code;
-            const code = weatherData.data_day.pictocode[i];
-            const weatherInfo = ((_weatherCodeMap$code = weatherCodeMap[code]) === null || _weatherCodeMap$code === void 0 ? void 0 : _weatherCodeMap$code.text) || "Unknown";
-            return /*#__PURE__*/_jsxs("tr", {
-              children: [/*#__PURE__*/_jsx("td", {
-                children: formatDate(time)
-              }), /*#__PURE__*/_jsx("td", {
-                children: weatherData.data_day.temperature_max[i].toFixed(1)
-              }), /*#__PURE__*/_jsxs("td", {
-                children: [/*#__PURE__*/_jsx("img", {
-                  src: `./${pictocodeToFilename(code)}`,
-                  alt: weatherInfo,
-                  width: 50,
-                  height: 50,
-                  style: {
-                    display: "block",
-                    margin: "0 auto 5px"
-                  }
-                }), weatherInfo]
-              })]
-            }, i);
-          })
-        })]
-      }), /*#__PURE__*/_jsx("img", {
-        src: createChartUrl(weatherData),
-        alt: "Weather Chart"
-      })]
-    })]
-  });
 }
-export default WeatherApp;
+
+//function to get the lat and long variables from an api
+async function getLatLong(location) {
+    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${location}&country=united%20kingdom&format=json`;
+    try {
+        const res = await fetch(geocodeUrl);
+        const result = await res.json();
+        if (!result[0]) throw new Error(`No results for ${location}`);
+        const { lat, lon } = result[0];
+        return [parseFloat(lat), parseFloat(lon)];
+    } catch (err) {
+        console.error("Geocoding error:", err);
+        return [null, null];
+    }
+}
+
+//function to form the pictocode filenames
+function pictocodeToFilename(code) {
+    return code.toString().padStart(2, "0") + "_iday.svg";
+}
+
+//function to build the url to call the weather API from the backend 
+function buildApiUrl() {
+    return `https://weatherapp-3o2e.onrender.com/weather?lat=${LAT}&lon=${LON}&LOCATION=${LOCATION}`;
+}
+
+//function to get data from the back end by passing token
+async function fetchWeatherData(token) {
+    try {
+        const res = await fetch(API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Error fetching weather data:", err);
+        alert("Failed to load weather data.");
+        return null;
+    }
+}
+
+//function to add data to table
+function populateTable(data) {
+    tableBody.innerHTML = "";
+    const count = data.data_day.time.length;
+
+    for (let i = 0; i < count; i++) {
+        const tr = document.createElement("tr");
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formatDate(data.data_day.time[i]);
+        tr.appendChild(tdDate);
+
+        const tdTemp = document.createElement("td");
+        tdTemp.textContent = data.data_day.temperature_max[i].toFixed(1);
+        tr.appendChild(tdTemp);
+
+        const tdWeather = document.createElement("td");
+        const code = data.data_day.pictocode[i];
+        const weatherInfo = weatherCodeMap[code]?.text || "Unknown";
+
+        const iconImg = document.createElement("img");
+        iconImg.src = `./${pictocodeToFilename(code)}`;
+        iconImg.alt = weatherInfo;
+        iconImg.style.width = "50px";
+        iconImg.style.height = "50px";
+        iconImg.style.display = "block";
+        iconImg.style.margin = "0 auto 5px";
+
+        tdWeather.appendChild(iconImg);
+        tdWeather.appendChild(document.createTextNode(weatherInfo));
+        tr.appendChild(tdWeather);
+
+        tableBody.appendChild(tr);
+    }
+}
+
+//function to form the chart url for quickchart.io - replace this with react code later in development?
+function createChartUrl(data) {
+    const labels = data.data_day.time.map((d) =>
+        new Date(d).toLocaleDateString(undefined, { weekday: "short" })
+    );
+    const temps = data.data_day.temperature_max;
+
+    const chartConfig = {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Max Temp (°C)",
+                    data: temps,
+                    backgroundColor: "rgba(0, 123, 255, 0.7)",
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: false },
+            },
+        },
+    };
+
+    return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
+}
+
+//function to get the pictocode map from meteoblue
+async function loadWeatherCodeMap() {
+    try {
+        const res = await fetch("https://www.meteoblue.com/en/weather/docs/pictogramoverview?set=daily&style=classic", {
+            headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed to load pictogram data");
+
+        const pictogramData = await res.json();
+        const map = {};
+        pictogramData.daily.forEach((entry) => {
+            map[entry.pictocode] = { text: entry.description };
+        });
+        return map;
+    } catch (error) {
+        console.error("Error loading pictocode map:", error);
+        return {};
+    }
+}
+
+//function fetch data from backend using token and call other functions to display the data
+async function initWeather(token) {
+    spinner.style.display = "block";
+    chart.style.display = "none";
+
+    weatherCodeMap = await loadWeatherCodeMap();
+
+    const [lat, lon] = await getLatLong(LOCATION);
+    if (!lat || !lon) {
+        alert("Failed to get location coordinates.");
+        spinner.style.display = "none";
+        return;
+    }
+
+    LAT = lat;
+    LON = lon;
+    API_URL = buildApiUrl();
+
+    const data = await fetchWeatherData(token);
+
+    if (data) {
+        populateTable(data);
+        chart.src = createChartUrl(data);
+        chart.style.display = "block";
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
+    }
+
+    spinner.style.display = "none";
+    document.getElementById("pageHeader").textContent = `7-Day Weather Forecast (${LOCATION})`;
+}
+
+//add event listeners
+citySelect.addEventListener("change", async () => {
+    LOCATION = citySelect.value;
+    const token = getAccessToken();
+    if (token) {
+        await initWeather(token);
+    }
+});
+
+document.getElementById("back-btn").addEventListener("click", () => {
+    document.getElementById("modal").style.display = "flex";
+});
+
+document.getElementById("ok-btn").addEventListener("click", () => {
+    window.location.href = "index.html";
+});
+
+window.addEventListener("click", (event) => {
+    if (event.target === document.getElementById("modal")) {
+        document.getElementById("modal").style.display = "none";
+    }
+});
+
+window.addEventListener("load", async () => {
+    const isAuthenticated = await initAuth0();
+
+    document.getElementById("login-btn").addEventListener("click", login);
+    document.getElementById("logout-btn").addEventListener("click", logout);
+
+    await updateUI();
+
+    if (isAuthenticated) {
+        const token = getAccessToken();
+        if (token) {
+            await initWeather(token);
+        }
+    }
+});

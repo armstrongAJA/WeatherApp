@@ -1,66 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>7-Day Forecast with Auth0</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Weather App</title>
+  
+  <!-- React + ReactDOM UMD builds -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Babel for JSX compilation in the browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    td, th { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    #spinner { display: none; }
+  </style>
 </head>
 <body>
-    <div class="centered">
-        <h1 id="pageHeader">7-Day Weather Forecast (Leeds)</h1>
-        <br />
-        <label for="city-select">Select City:</label>
-        <div class="city-select-wrapper">
-            <select id="city-select">
-                <option value="Leeds">Leeds</option>
-                <option value="York">York</option>
-                <option value="Blackburn">Blackburn</option>
-                <option value="London">London</option>
-                <option value="Manchester">Manchester</option>
-                <option value="Bristol">Bristol</option>
-            </select>
-        </div>
+  <h1>7-Day Weather Forecast</h1>
+  
+  <div id="root"></div>
 
-        <div class="content-wrapper">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Max Temp (°C)</th>
-                            <th>Weather</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <!-- Weather table here -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="chart-container">
-                <div id="spinner"></div>
-                <img id="chart" alt="Bar Chart" />
-            </div>
-        </div>
-
-        <button id="back-btn">Back to Home</button>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <p>Go back to home page?</p>
-            <button id="ok-btn">OK</button>
-        </div>
-    </div>
-
-    <div>
-        <button id="login-btn">Login</button>
-        <button id="logout-btn" style="display:none;">Logout</button>
-    </div>
-
-    <!-- attach scripts -->
-    <script type="module" src="./auth.js"></script>
-    <script type="module" src="weatherPage.js"></script>
+  <!-- Your weather app script -->
+  <script type="text/babel" src="weatherapp.js"></script>
 </body>
 </html>

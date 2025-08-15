@@ -1,4 +1,7 @@
-const { useState, useEffect } = React;
+// Import React and auth.js functions as ES modules
+import { useState, useEffect } from "https://cdn.skypack.dev/react";
+import ReactDOM from "https://cdn.skypack.dev/react-dom/client";
+import { login, logout, getAccessToken } from "./auth.js";
 
 function WeatherApp() {
   const [location, setLocation] = useState("Leeds");
@@ -7,16 +10,16 @@ function WeatherApp() {
   const [weatherCodeMap, setWeatherCodeMap] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-  };
+  const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 
   const pictocodeToFilename = (code) => code.toString().padStart(2, "0") + "_iday.svg";
 
   const getLatLong = async (loc) => {
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?city=${loc}&country=united%20kingdom&format=json`);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?city=${loc}&country=united%20kingdom&format=json`
+      );
       const result = await res.json();
       if (!result[0]) throw new Error(`No results for ${loc}`);
       return [parseFloat(result[0].lat), parseFloat(result[0].lon)];
@@ -69,18 +72,7 @@ function WeatherApp() {
     const temps = data.data_day.temperature_max;
     const chartConfig = {
       type: "bar",
-      data: {
-        labels,
-        datasets: [
-          {
-            label: "Max Temp (°C)",
-            data: temps,
-            backgroundColor: "rgba(0,123,255,0.7)",
-            borderColor: "rgba(0,123,255,1)",
-            borderWidth: 1,
-          },
-        ],
-      },
+      data: { labels, datasets: [{ label: "Max Temp (°C)", data: temps, backgroundColor: "rgba(0,123,255,0.7)", borderColor: "rgba(0,123,255,1)", borderWidth: 1 }] },
       options: { scales: { y: { beginAtZero: false } } },
     };
     return "https://quickchart.io/chart?c=" + encodeURIComponent(JSON.stringify(chartConfig));
@@ -88,7 +80,7 @@ function WeatherApp() {
 
   const loadWeather = async () => {
     setLoading(true);
-    const token = getAccessToken(); // from auth.js
+    const token = getAccessToken();
     const map = await loadWeatherCodeMap();
     setWeatherCodeMap(map);
 
@@ -117,8 +109,8 @@ function WeatherApp() {
         <option value="London">London</option>
         <option value="Manchester">Manchester</option>
       </select>
-      <button onClick={login}>Login</button> {/* from auth.js */}
-      <button onClick={logout}>Logout</button> {/* from auth.js */}
+      <button onClick={login}>Login</button>
+      <button onClick={logout}>Logout</button>
 
       {loading && <div>Loading...</div>}
 

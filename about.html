@@ -5,17 +5,13 @@
   <title>Weather App</title>
   
   <!-- React + ReactDOM UMD builds -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-  <!-- Babel for JSX compilation in the browser -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   
   <style>
     body { font-family: sans-serif; margin: 20px; }
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     td, th { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    #spinner { display: none; }
   </style>
 </head>
 <body>
@@ -23,10 +19,10 @@
   
   <div id="root"></div>
 
-  <!-- Load auth.js first -->
-  <script type="text/babel" src="auth.js"></script>
+  <!-- Load auth.js as a plain module -->
+  <script type="module" src="./auth.js"></script>
 
-  <!-- Then load weather app -->
-  <script type="text/babel" src="weatherPage.js"></script>
+  <!-- Load weather app as a module, importing auth.js -->
+  <script type="module" src="./weatherPage.js"></script>
 </body>
 </html>

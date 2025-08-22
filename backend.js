@@ -24,10 +24,13 @@ const checkJwt = auth({
 //Create POST method to pass code and verifier to the backend and initiate token exchange
 //Then send token back to frontend
 app.post('/weather', async (req, res) => {
+      
   const { code, verifier } = req.body;
-
-  if (!code || !verifier) {
-    return res.status(400).json({ error: 'Missing code or PKCE verifier' });
+  const redirecturiEncoded = req.query.redirect_uri; // from URL params
+  const redirecturi = redirecturiEncoded ? decodeURIComponent(redirecturiEncoded) : null;
+      
+  if (!code || !verifier || !redirecturi) {
+    return res.status(400).json({ error: 'Missing code, redirect uri or PKCE verifier' });
   }
 
   try {
@@ -39,7 +42,7 @@ app.post('/weather', async (req, res) => {
         client_secret: process.env.AUTH0_CLIENT_SECRET, // only safe on backend
         code,
         code_verifier: verifier,
-        redirect_uri: 'https://armstrongaja.github.io/WeatherApp/about.html'
+        redirect_uri: redirecturi
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );

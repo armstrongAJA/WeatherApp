@@ -8,7 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 //Add frontend origin to cors to ensure only requests from frontend can be sent to the backend, no other origins.
-app.use(cors({ origin: 'https://armstrongaja.github.io' }));
+app.use(cors({ origin: [
+      "https://armstrongaja.github.io",
+      "https://react-frontend-test-fh8w.onrender.com"
+    ] }));
 app.use(express.json());
 
 // Set up checkJwt with relevant parameters to validate token correctly later

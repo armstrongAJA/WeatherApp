@@ -25,11 +25,8 @@ const checkJwt = auth({
 //Then send token back to frontend
 app.post('/weather', async (req, res) => {
       
-  const { code, verifier } = req.body;
-  const redirecturiEncoded = req.query.redirect_uri; // from URL params
-  const redirecturi = redirecturiEncoded ? decodeURIComponent(redirecturiEncoded) : null;
-      
-  if (!code || !verifier || !redirecturi) {
+  const { code, verifier,redirect_uri } = req.body; 
+  if (!code || !verifier || !redirect_uri) {
     return res.status(400).json({ error: 'Missing code, redirect uri or PKCE verifier' });
   }
 
@@ -42,7 +39,7 @@ app.post('/weather', async (req, res) => {
         client_secret: process.env.AUTH0_CLIENT_SECRET, // only safe on backend
         code,
         code_verifier: verifier,
-        redirect_uri: redirecturi
+        redirect_uri: redirect_uri
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
